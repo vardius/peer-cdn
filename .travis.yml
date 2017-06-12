@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+  - "node"
+script:
+  - yarn run test:cov
+  - yarn run lint
+before_install:
+  - npm install -g yarn
+  - npm i -g codecov
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -e TRAVIS_NODE_VERSION

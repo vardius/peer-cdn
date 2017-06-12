@@ -1,0 +1,30 @@
+{
+  "presets": [
+    [
+      "env",
+      {
+        "modules": false,
+        "loose": true,
+        "useBuiltIns": true
+      }
+    ]
+  ],
+  "plugins": [
+    "external-helpers",
+    "transform-async-to-generator",
+    "transform-es3-member-expression-literals",
+    "transform-es3-property-literals"
+  ],
+  "env": {
+    "commonjs": {
+      "plugins": [
+        [
+          "transform-es2015-modules-commonjs",
+          {
+            "loose": true
+          }
+        ]
+      ]
+    }
+  }
+}

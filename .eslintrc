@@ -1,0 +1,39 @@
+{
+  "parser": "babel-eslint",
+  "extends": ["eslint:recommended"],
+  "plugins": [
+    "babel",
+    "import"
+  ],
+
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "impliedStrict": true,
+      "experimentalObjectRestSpread": true
+    }
+  },
+  "env": {
+    "browser": true, // browser global variables.
+    "node": true, // Node.js global variables and Node.js-specific rules.
+    "es6": true, // es6
+    "mocha": true // adds all of the Mocha testing global variables.
+  },
+  "globals": {
+    "define": true
+  },
+  "rules": {
+    "import/default": 0,
+    "import/first": 0,
+    "import/no-duplicates": 0,
+    "import/named": 0,
+    "import/namespace": 0,
+    "import/no-unresolved": 0,
+    "import/no-named-as-default": 2,
+    "import/prefer-default-export": 0,
+
+    "object-curly-spacing": 0,
+    "no-use-before-define": 0
+  }
+}

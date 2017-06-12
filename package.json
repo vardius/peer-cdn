@@ -1,0 +1,103 @@
+{
+  "name": "peer-cdn",
+  "version": "1.0.0",
+  "description": "Lightweight library providing peer to peer CDN functionality",
+  "browser": "dist/peer-cdn.min.js",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "jsnext:main": "es/index.js",
+  "files": [
+    "dist",
+    "lib",
+    "es",
+    "src"
+  ],
+  "scripts": {
+    "clean": "rimraf lib dist es coverage",
+    "lint": "eslint src test build",
+    "test": "cross-env BABEL_ENV=commonjs jest",
+    "test:watch": "yarn test -- --watch",
+    "test:cov": "yarn test -- --coverage",
+    "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --out-dir lib",
+    "build:es": "cross-env BABEL_ENV=es babel src --out-dir es",
+    "build:umd": "cross-env BABEL_ENV=es NODE_ENV=development rollup -c -i src/index.js -o dist/peer-cdn.js",
+    "build:umd:min": "cross-env BABEL_ENV=es NODE_ENV=production rollup -c -i src/index.js -o dist/peer-cdn.min.js",
+    "build": "yarn run build:commonjs && yarn run build:es && yarn run build:umd && yarn run build:umd:min",
+    "prepare": "yarn run build",
+    "prebuild": "yarn run clean",
+    "posttest": "yarn run lint",
+    "preversion": "yarn test",
+    "postversion": "git push && git push --tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vardius/peer-cdn.git"
+  },
+  "keywords": [
+    "peer-cdn",
+    "peer",
+    "cdn",
+    "service",
+    "worker",
+    "workers",
+    "peer-to-peer",
+    "peer-2-peer",
+    "peer2peer",
+    "p2p",
+    "cache"
+  ],
+  "authors": [
+    "Rafał Lorenz <vardius@gmail.com> (https://github.com/vardius)"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vardius/peer-cdn/issues"
+  },
+  "homepage": "http://rafallorenz/peer-cdn",
+  "npmName": "peer-cdn",
+  "npmFileMap": [
+    {
+      "basePath": "/dist/",
+      "files": [
+        "*.js"
+      ]
+    }
+  ],
+  "browserify": {
+    "transform": [
+      "loose-envify"
+    ]
+  },
+  "jest": {
+    "testRegex": "(/test/.*\\.spec.js)$"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "babel-cli": "^6.3.15",
+    "babel-core": "^6.3.15",
+    "babel-eslint": "^7.0.0",
+    "babel-jest": "^20.0.3",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-transform-es3-member-expression-literals": "^6.5.0",
+    "babel-plugin-transform-es3-property-literals": "^6.5.0",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-env": "^1.5.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "babel-register": "^6.3.13",
+    "check-es3-syntax-cli": "^0.2.0",
+    "cross-env": "^5.0.0",
+    "eslint": "^3.8.1",
+    "eslint-plugin-babel": "^4.1.1",
+    "eslint-plugin-flowtype": "^2.34.0",
+    "eslint-plugin-import": "^2.3.0",
+    "glob": "^7.1.2",
+    "jest": "^20.0.4",
+    "jest-cli": "^20.0.4",
+    "rimraf": "^2.3.4",
+    "rollup": "^0.41.4",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-replace": "^1.1.1",
+    "rollup-plugin-uglify": "^2.0.1"
+  }
+}
