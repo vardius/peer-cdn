@@ -22,7 +22,7 @@ Lightweight library providing peer to peer CDN functionality
 
 Is *peer-cdn* library missing something ?
 
-No problem! Simply [fork](https://github.com/vardius/peer-cdn/network#fork-destination-box) this repository, [add middleware](https://github.com/vardius/peer-cdn/wiki/Middleware) and create pull request.
+No problem! Simply [fork](https://github.com/vardius/peer-cdn/network#fork-destination-box) this repository and create pull request.
 
 ## Instaliation
 
