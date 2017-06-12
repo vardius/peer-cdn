@@ -1,5 +1,5 @@
 {
-  "name": "@vardius/peer-cdn",
+  "name": "peer-cdn",
   "version": "0.0.1-alpha",
   "description": "Lightweight library providing peer to peer CDN functionality",
   "browser": "dist/peer-cdn.min.js",
