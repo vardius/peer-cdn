@@ -1,6 +1,8 @@
-export default event => response => {
-  if (event.request.headers.get("range")) {
-    return response.arrayBuffer().then(function(ab) {
+export default function getPartialResponse(event) {
+  return async response => {
+    if (event.request.headers.get("range")) {
+      const ab = await response.arrayBuffer();
+
       var pos = Number(
         /^bytes\=(\d+)\-$/g.exec(event.request.headers.get("range"))[1]
       );
@@ -25,10 +27,10 @@ export default event => response => {
           ]
         ]
       });
-    });
-  }
+    }
 
-  console.log("Non-range request for", event.request.url);
+    console.log("Non-range request for", event.request.url);
 
-  return response;
-};
+    return response;
+  };
+}

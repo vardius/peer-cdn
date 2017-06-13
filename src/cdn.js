@@ -1,11 +1,5 @@
 import { getInstall, getActivate, getFetch } from "./handlers";
-import {
-  skipWaiting,
-  getFromNetwork,
-  getPartialResponse,
-  Cache,
-  Peers
-} from "./middleware";
+import { getFromNetwork, getPartialResponse, Cache, Peers } from "./middleware";
 
 export default class PeerCDN {
   // If at any point you want to force pages that use this service worker to start using a fresh
@@ -32,11 +26,11 @@ export default class PeerCDN {
   }
 
   fetch(...middlewares) {
-    return getFetch(this.regex, middlewares);
+    return getFetch(this.regex)(middlewares);
   }
 
   register(sw) {
-    [this.install(skipWaiting)].forEach(handler =>
+    [this.install()].forEach(handler =>
       sw.addEventListener("install", handler)
     );
 
@@ -50,7 +44,7 @@ export default class PeerCDN {
     [
       this.fetch(
         this.cache.getFromCache,
-        Peers.getFromPeer,
+        this.peers.getFromPeer,
         getFromNetwork,
         getPartialResponse,
         this.cache.saveToCache

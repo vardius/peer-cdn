@@ -1,10 +1,10 @@
-export default async function applyMiddleware(...middlewares) {
-  return event => {
-    return compose(...middlewares)(event);
+export default function applyMiddleware(...middlewares) {
+  return async event => {
+    return await compose(...middlewares)(event);
   };
 }
 
-export async function compose(...funcs) {
+export function compose(...funcs) {
   if (funcs.length === 0) {
     return arg => arg;
   }
@@ -13,5 +13,5 @@ export async function compose(...funcs) {
     return funcs[0];
   }
 
-  return funcs.reduce((a, b) => async (...args) => await a(await b(...args)));
+  return funcs.reduce((a, b) => async (...args) => await b(await a(...args)));
 }

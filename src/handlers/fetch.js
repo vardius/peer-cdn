@@ -1,6 +1,6 @@
 import { compose } from "./middleware";
 
-async function applyMiddleware(...middlewares) {
+function applyMiddleware(...middlewares) {
   return event => async response => {
     const chain = middlewares.map(middleware => middleware(event));
     return await compose(...chain)(response);
@@ -9,11 +9,7 @@ async function applyMiddleware(...middlewares) {
 
 async function fetchResponse(event, middlewares) {
   try {
-    const response = await applyMiddleware(...middlewares)(event)(null);
-
-    console.log(response);
-
-    return response;
+    return await applyMiddleware(...middlewares)(event)(null);
   } catch (error) {
     // This catch() will handle exceptions thrown from the fetch() operation.
     // Note that a HTTP error response (e.g. 404) will NOT trigger an exception.
@@ -22,8 +18,8 @@ async function fetchResponse(event, middlewares) {
   }
 }
 
-export default function getFetch(regex, middlewares) {
-  return regex => event => {
+export default function getFetch(regex) {
+  return middlewares => event => {
     // If regex !== null - only call event.respondWith() if request.url matches regex.
     // Because we don't call event.respondWith() for other requests, they will not be
     // handled by the service worker, and the default network behavior will apply.

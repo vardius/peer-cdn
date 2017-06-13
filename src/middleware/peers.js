@@ -1,23 +1,25 @@
 export default class Peers {
   constructor() {
     this.match = this.match.bind(this);
+    this.getFromPeer = this.getFromPeer.bind(this);
   }
 
   async match(request) {
     return null;
   }
 
-  static getFromPeer = event => response => {
-    if (response) {
-      return response;
-    }
+  getFromPeer(event) {
+    return async res => {
+      if (res) {
+        return res;
+      }
 
-    return this.match(event.request).then(function(response) {
+      const response = await this.match(event.request);
       if (response) {
         return response;
       }
 
       return null;
-    });
-  };
+    };
+  }
 }
