@@ -8,15 +8,15 @@
 
 Lightweight library providing peer to peer CDN functionality
 
-**This is work in progress!**
-- [ ] Figure out PeerCDN API
+# **This is work in progress!**
+- [x] Figure out PeerCDN API
 - [x] Setup sw cache fetch
 - [x] Setup sw peer fetch
 - [x] Setup sw network fetch
-- [ ] Use peer-data
+- [x] Use peer-data
 - [ ] Create peers match algorithm
 - [ ] Create peers fetch algorithm
-- [ ] Setup signaling socker.io server
+- [ ] Setup signaling socket.io server
 
 ## Contribution
 
