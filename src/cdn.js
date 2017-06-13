@@ -6,10 +6,10 @@ export default class PeerCDN {
   // cache, then increment the cacheVersion value. It will kick off the service worker update
   // flow and the old cache(s) will be purged as part of the activate event handler when the
   // updated service worker is activated.
-  constructor(cacheVersion) {
-    this.regex = null; //todo extract to config
-    this.peers = new Peers();
-    this.cache = new Cache(cacheVersion);
+  constructor(options) {
+    this.regex = options.regex;
+    this.peers = new Peers(options.peer);
+    this.cache = new Cache(options.cache);
 
     this.register = this.register.bind(this);
     this.install = this.install.bind(this);

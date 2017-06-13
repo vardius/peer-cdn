@@ -1,6 +1,6 @@
 export default class Cache {
-  constructor(version) {
-    this.names = { peerfetch: "peerfetch-cache-v" + version };
+  constructor(options) {
+    this.names = { peerfetch: "peerfetch-cache-v" + options.version };
 
     this.getFromCache = this.getFromCache.bind(this);
     this.saveToCache = this.saveToCache.bind(this);
@@ -27,6 +27,10 @@ export default class Cache {
 
   saveToCache(event) {
     return response => {
+      if (event.request.headers.has("range")) {
+        return response;
+      }
+
       if (response) {
         // IMPORTANT: Clone the response. A response is a stream
         // and because we want the browser to consume the response
