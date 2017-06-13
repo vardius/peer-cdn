@@ -1,5 +1,5 @@
-import { install, getActivate, getFetch } from "./handlers";
-import Peers from "./peers";
+import { getInstall, getActivate, getFetch } from "./handlers";
+import { getFromNetwork, getPartialResponse, Cache, Peers } from "./middleware";
 
 export default class PeerCDN {
   // If at any point you want to force pages that use this service worker to start using a fresh
@@ -7,9 +7,9 @@ export default class PeerCDN {
   // flow and the old cache(s) will be purged as part of the activate event handler when the
   // updated service worker is activated.
   constructor(cacheVersion) {
-    this.currentCaches = { peerfetch: "peerfetch-cache-v" + cacheVersion };
-    this.regex = /https:\/\/www.googleapis.com\/youtube\/v3\/playlistItems/; //todo extract to config
+    this.regex = null; //todo extract to config
     this.peers = new Peers();
+    this.cache = new Cache(cacheVersion);
 
     this.register = this.register.bind(this);
     this.install = this.install.bind(this);
@@ -17,30 +17,38 @@ export default class PeerCDN {
     this.fetch = this.fetch.bind(this);
   }
 
-  install() {
-    return install;
+  install(...middlewares) {
+    return getInstall(middlewares);
   }
 
-  activate() {
-    return getActivate(this.currentCaches);
+  activate(...middlewares) {
+    return getActivate(middlewares);
   }
 
-  fetch() {
-    return getFetch(this.currentCaches, this.regex, this.peers);
+  fetch(...middlewares) {
+    return getFetch(this.regex, middlewares);
   }
 
   register(sw) {
-    [this.install()].forEach(handler =>
+    [this.install(self.skipWaiting)].forEach(handler =>
       sw.addEventListener("install", handler)
     );
 
-    [this.activate()].forEach(handler =>
+    [this.activate(this.cache.clearOldCaches)].forEach(handler =>
       sw.addEventListener("activate", handler)
     );
 
     // fetch register events from array.
     // When an event occurs, they're invoked one at a time, in the order that they're registered.
     // As soon as one handler calls event.respondWith(), none of the other registered handlers will be run.
-    [this.fetch()].forEach(handler => sw.addEventListener("fetch", handler));
+    [
+      this.fetch(
+        this.cache.getFromCache,
+        Peers.getFromPeer,
+        getFromNetwork,
+        getPartialResponse,
+        this.cache.saveToCache
+      )
+    ].forEach(handler => sw.addEventListener("fetch", handler));
   }
 }

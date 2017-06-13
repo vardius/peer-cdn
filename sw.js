@@ -1,6 +1,6 @@
 (function() {
   "use strict";
-  self.importScripts("./peer-cdn.js");
+  self.importScripts("./dist/peer-cdn.js");
 
   function run() {
     const cdn = new PeerCDN(1);

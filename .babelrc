@@ -11,6 +11,7 @@
   ],
   "plugins": [
     "external-helpers",
+    "transform-class-properties",
     "transform-async-to-generator",
     "transform-es3-member-expression-literals",
     "transform-es3-property-literals"
