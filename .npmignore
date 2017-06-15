@@ -1,9 +1,8 @@
 .idea
-doc
-coverage
-examples
+.DS_Store
+*.log
 node_modules
+coverage
 src
 test
-jspm_packages
 npm-debug.log
