@@ -1,0 +1,23 @@
+{
+  "name": "peer-cdn",
+  "version": "1.0.0",
+  "description": "PeerCDN webpack example",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "bugs": {
+    "url": "https://github.com/vardius/peer-cdn/issues"
+  },
+  "homepage": "https://github.com/vardius/peer-cdn",
+  "author": {
+    "name": "Rafał Lorenz",
+    "email": "vardius@gmail.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "cookie-parser": "1.4.3",
+    "express": "^4.15.3",
+    "socket.io": "^2.0.2"
+  },
+  "devDependencies": {}
+}

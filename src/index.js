@@ -1,5 +1,5 @@
 import 'babel-polyfill/dist/polyfill';
-import PeerCDN from "./cdn";
+import PeerCDN from "./PeerCDN";
 
 self.PeerCDN = PeerCDN;
 

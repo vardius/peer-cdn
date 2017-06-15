@@ -1,6 +1,6 @@
 (function() {
   "use strict";
-  self.importScripts("./dist/peer-cdn.js");
+  self.importScripts("vendor/peer-cdn.min.js");
 
   const config = {
     regex: null,

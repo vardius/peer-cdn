@@ -1,5 +1,5 @@
-import Cache from "./cache";
-import Peers from "./peers";
+import Cache from "./Cache";
+import Peers from "./Peers";
 import getFromNetwork from "./getFromNetwork";
 import getPartialResponse from "./getPartialResponse";
 

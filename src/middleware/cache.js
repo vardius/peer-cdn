@@ -36,10 +36,11 @@ export default class Cache {
         // and because we want the browser to consume the response
         // as well as the cache consuming the response, we need
         // to clone it so we have two streams.
-        var responseToCache = response.clone();
+        const responseToCache = response.clone();
 
         caches.open(this.name).then(function(cache) {
-          cache.put(event.request, responseToCache);
+          const cacheRequest = event.request.clone();
+          cache.put(cacheRequest, responseToCache);
         });
       }
 
