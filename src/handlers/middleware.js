@@ -1,9 +1,11 @@
+// Middleware used for install and activate
 export default function applyMiddleware(...middlewares) {
   return async event => {
     return await compose(...middlewares)(event);
   };
 }
 
+// Compose used for install and activate
 export function compose(...funcs) {
   if (funcs.length === 0) {
     return arg => arg;

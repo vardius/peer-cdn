@@ -24,6 +24,8 @@ export default class Peer {
             return response;
           }
 
+          //todo: dawnload and seed response
+
           return null;
         });
       },
@@ -33,6 +35,8 @@ export default class Peer {
         // as well as the cache consuming the response, we need
         // to clone it so we have two streams.
         const responseToSeed = response.clone();
+
+        //todo: seed response
       }
     };
   }
