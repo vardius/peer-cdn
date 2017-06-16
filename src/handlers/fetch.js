@@ -1,3 +1,4 @@
+// Apply fetch middleware
 function applyMiddleware(...middlewares) {
   return async event => {
     const composed = await compose(middlewares)(event);
@@ -5,6 +6,9 @@ function applyMiddleware(...middlewares) {
   };
 }
 
+// Composes middleware into single object
+// Automatically skips next calls when response is not null
+// Call put method for previous middlewares with given response
 function compose(funcs) {
   if (funcs.length === 0) {
     return arg => ({ get: () => arg });
@@ -28,11 +32,23 @@ function compose(funcs) {
 
     return {
       get: () => response,
-      put: r => {
-        y.put(r);
-        x.put(r);
-      }
+      put: composePut(x.put, y.put)
     };
+  });
+}
+
+// Composes put methods for previous middlewares into single one
+function composePut(funcs) {
+  // If middleware has no put method, mock it
+  funcs = funcs.map(func => (...args) => {
+    if (typeof response === "function") {
+      func(...args);
+    }
+  });
+
+  return funcs.reduce((a, b) => (...args) => {
+    a(...args);
+    b(...args);
   });
 }
 
