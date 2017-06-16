@@ -24,6 +24,7 @@ export default class Network {
       const ab = await response.arrayBuffer();
 
       var pos = Number(
+        // eslint-disable-next-line
         /^bytes\=(\d+)\-$/g.exec(request.headers.get("range"))[1]
       );
 
