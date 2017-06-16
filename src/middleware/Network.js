@@ -31,15 +31,6 @@ export default class Network {
         /^bytes\=(\d+)\-$/g.exec(request.headers.get("range"))[1]
       );
 
-      console.log(
-        "Range request for",
-        request.url,
-        ", starting position:",
-        pos,
-        "Array buffer:",
-        ab
-      );
-
       return new Response(ab.slice(pos), {
         status: 206,
         statusText: "Partial Content",
@@ -52,8 +43,6 @@ export default class Network {
         ]
       });
     }
-
-    console.log("Non-range request for", request.url);
 
     return response;
   }
