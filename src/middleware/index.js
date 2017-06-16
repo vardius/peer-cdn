@@ -1,6 +1,5 @@
 import Cache from "./Cache";
-import Peers from "./Peers";
-import getFromNetwork from "./getFromNetwork";
-import getPartialResponse from "./getPartialResponse";
+import Peer from "./Peer";
+import Network from "./Network";
 
-export { Cache, Peers, getFromNetwork, getPartialResponse };
+export { Cache, Peer, Network };

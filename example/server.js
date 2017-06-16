@@ -4,16 +4,10 @@ import cookieParser from "cookie-parser";
 import http from "http";
 import os from "os";
 import socketIO from "socket.io";
+import { SignalingEventType } from "peer-data";
 
 const port = process.env.PORT || 3000;
 const index = fspath.join(__dirname, "index.html");
-const SocketEventType = {
-  CONNECT: "CONNECT",
-  DISCONNECT: "DISCONNECT",
-  CANDIDATE: "CANDIDATE",
-  OFFER: "OFFER",
-  ANSWER: "ANSWER"
-};
 
 const app = express();
 app.get("/favicon.ico", (req, res) => {
@@ -54,17 +48,17 @@ io.on("connection", function(socket) {
     log("SERVER_LOG", event);
 
     switch (event.type) {
-      case SocketEventType.CONNECT:
+      case SignalingEventType.CONNECT:
         onConnect(event.room.id);
         socket.broadcast.to(event.room.id).emit("message", event);
         break;
-      case SocketEventType.DISCONNECT:
+      case SignalingEventType.DISCONNECT:
         onDisconnect(event.room.id);
         socket.broadcast.to(event.room.id).emit("message", event);
         break;
-      case SocketEventType.OFFER:
-      case SocketEventType.ANSWER:
-      case SocketEventType.CANDIDATE:
+      case SignalingEventType.OFFER:
+      case SignalingEventType.ANSWER:
+      case SignalingEventType.CANDIDATE:
         socket.broadcast.to(event.callee.id).emit("message", event);
         break;
       default:

@@ -1,6 +1,6 @@
 import PeerData, { SocketChannel, AppEventType } from "peer-data";
 
-export default class Peers {
+export default class Peer {
   constructor(options) {
     this.peerData = new PeerData(options.servers, options.constraints);
     this.signaling = new SocketChannel();
@@ -14,23 +14,31 @@ export default class Peers {
     this.getFromPeer = this.getFromPeer.bind(this);
   }
 
-  async match(request) {
-    this.connect(request.url);
+  // Middleware factory function for fetch event
+  getMiddleware(event) {
+    return {
+      get: () => {
+        // match() will look for an entry in all of the seeds available to the service worker.
+        return this.match(event.request).then(function(response) {
+          if (response) {
+            return response;
+          }
+
+          return null;
+        });
+      },
+      put: response => {
+        // IMPORTANT: Clone the response. A response is a stream
+        // and because we want the browser to consume the response
+        // as well as the cache consuming the response, we need
+        // to clone it so we have two streams.
+        const responseToSeed = response.clone();
+      }
+    };
   }
 
-  getFromPeer(event) {
-    return async res => {
-      if (res) {
-        return res;
-      }
-
-      const response = await this.match(event.request);
-      if (response) {
-        return response;
-      }
-
-      return null;
-    };
+  async match(request) {
+    this.connect(request.url);
   }
 
   _connect(url) {
