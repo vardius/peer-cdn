@@ -1,5 +1,5 @@
 import { getInstall, getActivate, getFetch } from "./handlers";
-import { Network, Cache, Peer } from "./middleware";
+import { Network, Peer } from "./plugins";
 
 export default class PeerCDN {
   // If at any point you want to force pages that use this service worker to start using a fresh
@@ -12,9 +12,8 @@ export default class PeerCDN {
     this.activateMiddleware = options.activate || [];
     this.fetchMiddleware = options.fetch || [];
 
-    this.cache = new Cache(options.cache);
     this.peers = new Peer(options.peer);
-    this.network = new Network();
+    this.network = new Network(options.network);
 
     this.register = this.register.bind(this);
     this.install = this.install.bind(this);
@@ -35,9 +34,8 @@ export default class PeerCDN {
   // Returns fetch event handler
   fetch() {
     const middlewares = this.fetchMiddleware.concat([
-      this.cache.getMiddleware,
-      this.peers.getMiddleware,
-      this.network.getMiddleware
+      this.peers.getFetchMiddleware,
+      this.network.getFetchMiddleware
     ]);
 
     return getFetch(this.regex)(middlewares);
@@ -45,17 +43,11 @@ export default class PeerCDN {
 
   // Register handlers for give service worker instance
   register(sw) {
-    [this.install()].forEach(handler =>
-      sw.addEventListener("install", handler)
-    );
-
-    [this.activate(this.cache.clearOldCaches)].forEach(handler =>
-      sw.addEventListener("activate", handler)
-    );
-
+    [this.install()].forEach(h => sw.addEventListener("install", h));
+    [this.activate()].forEach(h => sw.addEventListener("activate", h));
     // Register fetch events from array.
     // When an event occurs, they're invoked one at a time, in the order that they're registered.
     // As soon as one handler calls event.respondWith(), none of the other registered handlers will be run.
-    [this.fetch()].forEach(handler => sw.addEventListener("fetch", handler));
+    [this.fetch()].forEach(h => sw.addEventListener("fetch", h));
   }
 }

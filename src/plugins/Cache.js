@@ -9,7 +9,7 @@ export default class Cache {
   }
 
   // Middleware factory function for fetch event
-  getMiddleware(event) {
+  getFetchMiddleware(event) {
     return {
       get: () => {
         // caches.match() will look for a cache entry in all of the caches available to the service worker.

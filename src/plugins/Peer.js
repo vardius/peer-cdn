@@ -2,7 +2,19 @@ import PeerData, { SocketChannel, AppEventType } from "peer-data";
 
 export default class Peer {
   constructor(options) {
-    this.peerData = new PeerData(options.servers, options.constraints);
+    const servers = options.servers || {
+      iceServers: [
+        {
+          // url: "stun:stun.1.google.com:19302"
+          url: "stun:74.125.142.127:19302"
+        }
+      ]
+    };
+    const constraints = options.constraints || {
+      ordered: true
+    };
+
+    this.peerData = new PeerData(servers, constraints);
     this.signaling = new SocketChannel();
 
     this.peerData.on(AppEventType.CHANNEL, this._onChannel.bind(this));
@@ -17,7 +29,7 @@ export default class Peer {
   }
 
   // Middleware factory function for fetch event
-  getMiddleware(event) {
+  getFetchMiddleware(event) {
     return {
       get: () => {
         // match() will look for an entry in all of the seeds available to the service worker.
@@ -47,6 +59,22 @@ export default class Peer {
 
   async match(request) {
     this.connect(request.url);
+
+    const stream = new ReadableStream({
+      // start(controller) {
+      //   /* there's more data */
+      //   if (true) {
+      //     controller.enqueue(/* your data here */);
+      //   } else {
+      //     controller.close();
+      //   }
+      // }
+    });
+
+    return new Response(stream, {
+      /* your content-type here */
+      headers: { "content-type": "" }
+    });
   }
 
   _connect(url) {
