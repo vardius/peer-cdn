@@ -22,7 +22,7 @@
     "build:es": "cross-env BABEL_ENV=es babel src --out-dir es",
     "build:umd": "cross-env BABEL_ENV=es NODE_ENV=development rollup -c -i src/index.js -o dist/peer-cdn.js",
     "build:umd:min": "cross-env BABEL_ENV=es NODE_ENV=production rollup -c -i src/index.js -o dist/peer-cdn.min.js",
-    "build": "yarn run build:commonjs && yarn run build:es && yarn run build:umd && yarn run build:umd:min",
+    "build": "yarn run build:commonjs & yarn run build:es & yarn run build:umd & yarn run build:umd:min",
     "prepare": "yarn run build",
     "prebuild": "yarn run clean",
     "posttest": "yarn run lint",
