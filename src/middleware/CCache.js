@@ -1,9 +1,9 @@
 export default class Cache {
   constructor(options) {
+    // Overkill for this single cache example but this is a best practise
     this.names = { peerfetch: "peerfetch-cache-v" + options.version };
 
-    this.getFromCache = this.getFromCache.bind(this);
-    this.saveToCache = this.saveToCache.bind(this);
+    this.getMiddleware = this.getMiddleware.bind(this);
     this.clearOldCaches = this.clearOldCaches.bind(this);
   }
 

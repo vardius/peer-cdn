@@ -13,8 +13,7 @@ export default class Peer {
     // eslint-disable-next-line
     this.peerData.on(AppEventType.LOG, event => console.log(event));
 
-    this.match = this.match.bind(this);
-    this.getFromPeer = this.getFromPeer.bind(this);
+    this.getMiddleware = this.getMiddleware.bind(this);
   }
 
   // Middleware factory function for fetch event

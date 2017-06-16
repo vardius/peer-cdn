@@ -1,5 +1,7 @@
 export default class Network {
-  constructor() {}
+  constructor() {
+    this.getMiddleware = this.getMiddleware.bind(this);
+  }
 
   // Middleware factory function for fetch event
   getMiddleware(event) {
