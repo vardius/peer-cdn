@@ -4,11 +4,7 @@ export default class Network {
   // Middleware factory function for fetch event
   getMiddleware(event) {
     return {
-      get: async res => {
-        if (res) {
-          return res;
-        }
-
+      get: async () => {
         // event.request will always have the proper mode set ('cors, 'no-cors', etc.) so we don't
         // have to hardcode 'no-cors' like we do when fetch()ing in the install handler.
         const fetchRequest = event.request.clone();
