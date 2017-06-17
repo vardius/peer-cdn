@@ -29,10 +29,11 @@ export default class Network {
   }
 
   concatArrayBuffer(ab1, ab2) {
-    const tmp = new Uint8Array(ab1.byteLength + ab2.byteLength);
-    tmp.set(new Uint8Array(ab1), 0);
-    tmp.set(new Uint8Array(ab2), ab1.byteLength);
-    return tmp.buffer;
+    const ua = new Uint8Array(ab1.byteLength + ab2.byteLength);
+    ua.set(new Uint8Array(ab1), 0);
+    ua.set(new Uint8Array(ab2), ab1.byteLength);
+
+    return ua.buffer;
   }
 
   onHeadResponse(request, response) {
