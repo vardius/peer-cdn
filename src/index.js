@@ -1,6 +1,6 @@
 import "babel-polyfill/dist/polyfill";
 import PeerCDN from "./PeerCDN";
-import { Cacheas as CachePlugin } from "./plugins";
+import { Cache as CachePlugin } from "./plugins";
 
 self.PeerCDN = PeerCDN;
 self.CachePlugin = CachePlugin;

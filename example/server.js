@@ -1,11 +1,12 @@
-import express from "express";
-import fspath from "path";
-import cookieParser from "cookie-parser";
-import http from "http";
-import os from "os";
-import socketIO from "socket.io";
-import { SignalingEventType } from "peer-data";
+const express = require("express");
+const fspath = require("path");
+const cookieParser = require("cookie-parser");
+const http = require("http");
+const os = require("os");
+const socketIO = require("socket.io");
+const peerData = require("peer-data");
 
+const SignalingEventType = peerData.SignalingEventType;
 const port = process.env.PORT || 3000;
 const index = fspath.join(__dirname, "index.html");
 

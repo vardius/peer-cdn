@@ -4,7 +4,7 @@ export default class Cache {
     // Overkill for this single cache example but this is a best practise
     this.names = { peerfetch: "peerfetch-cache-v" + version };
 
-    this.getMiddleware = this.getMiddleware.bind(this);
+    this.getFetchMiddleware = this.getFetchMiddleware.bind(this);
     this.clearOldCaches = this.clearOldCaches.bind(this);
   }
 

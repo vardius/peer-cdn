@@ -7,6 +7,7 @@ var env = process.env.NODE_ENV;
 var config = {
   format: "umd",
   moduleName: "peer-cdn",
+  exports: "named",
   plugins: [
     resolve({
       jsnext: true

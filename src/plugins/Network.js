@@ -2,7 +2,7 @@ export default class Network {
   constructor(options) {
     this.chunkSize = options.chunkSize || 204800;
 
-    this.getMiddleware = this.getMiddleware.bind(this);
+    this.getFetchMiddleware = this.getFetchMiddleware.bind(this);
   }
 
   // Middleware factory function for fetch event

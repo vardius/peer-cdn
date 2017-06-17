@@ -1,10 +1,11 @@
 (function() {
   "use strict";
-  self.importScripts("vendor/peer-cdn.min.js");
+  self.importScripts("/vendor/peer-cdn.min.js");
 
   const cachePlugin = new CachePlugin({ version: 1 });
 
   const config = {
+    // fetch will only handler request with url matching regex
     regex: null,
     peer: {
       servers: {

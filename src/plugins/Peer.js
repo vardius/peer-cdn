@@ -25,7 +25,7 @@ export default class Peer {
     // eslint-disable-next-line
     this.peerData.on(AppEventType.LOG, event => console.log(event));
 
-    this.getMiddleware = this.getMiddleware.bind(this);
+    this.getFetchMiddleware = this.getFetchMiddleware.bind(this);
   }
 
   // Middleware factory function for fetch event
@@ -60,16 +60,18 @@ export default class Peer {
   async match(request) {
     this.connect(request.url);
 
-    const stream = new ReadableStream({
-      // start(controller) {
-      //   /* there's more data */
-      //   if (true) {
-      //     controller.enqueue(/* your data here */);
-      //   } else {
-      //     controller.close();
-      //   }
-      // }
-    });
+    const stream = new ReadableStream(
+      {
+        // start(controller) {
+        //   /* there's more data */
+        //   if (true) {
+        //     controller.enqueue(/* your data here */);
+        //   } else {
+        //     controller.close();
+        //   }
+        // }
+      }
+    );
 
     return new Response(stream, {
       /* your content-type here */
