@@ -15,7 +15,7 @@ export default class Peer {
     };
 
     this.peerData = new PeerData(servers, constraints);
-    this.signaling = new SocketChannel();
+    this.signaling = new SocketChannel({jsonp: false});
 
     this.peerData.on(AppEventType.CHANNEL, this._onChannel.bind(this));
     // eslint-disable-next-line

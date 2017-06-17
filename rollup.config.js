@@ -1,5 +1,6 @@
 import resolve from "rollup-plugin-node-resolve";
 import babel from "rollup-plugin-babel";
+import commonjs from "rollup-plugin-commonjs";
 import replace from "rollup-plugin-replace";
 import uglify from "rollup-plugin-uglify";
 
@@ -10,7 +11,16 @@ var config = {
   exports: "named",
   plugins: [
     resolve({
-      jsnext: true
+      jsnext: true,
+      browser: true
+    }),
+    commonjs({
+      namedExports: {
+        "node_modules/peer-data/dist/bundle.js": [
+          "SocketChannel",
+          "AppEventType"
+        ]
+      }
     }),
     babel({
       exclude: "node_modules/**"
