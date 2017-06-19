@@ -15,7 +15,7 @@ export default class Peer {
     };
 
     this.peerData = new PeerData(servers, constraints);
-    this.signaling = new SocketChannel({jsonp: false});
+    this.signaling = new SocketChannel({ jsonp: false });
 
     this.peerData.on(AppEventType.CHANNEL, this._onChannel.bind(this));
     // eslint-disable-next-line
@@ -31,17 +31,8 @@ export default class Peer {
   // Middleware factory function for fetch event
   getFetchMiddleware(event) {
     return {
-      get: () => {
-        // match() will look for an entry in all of the seeds available to the service worker.
-        return this.match(event.request).then(function(response) {
-          if (response) {
-            return response;
-          }
-
-          //todo: dawnload and seed response
-
-          return null;
-        });
+      get: async () => {
+        return null;
       },
       put: response => {
         // IMPORTANT: Clone the response. A response is a stream
@@ -49,8 +40,10 @@ export default class Peer {
         // as well as the cache consuming the response, we need
         // to clone it so we have two streams.
 
+        // const responseToSeed = response.clone();
+
         // eslint-disable-next-line
-        const responseToSeed = response.clone();
+        console.log(response);
 
         //todo: seed response
       }
@@ -58,25 +51,28 @@ export default class Peer {
   }
 
   async match(request) {
-    this.connect(request.url);
+    this._connect(request.url);
+    //on connected ge
 
-    const stream = new ReadableStream(
-      {
-        // start(controller) {
-        //   /* there's more data */
-        //   if (true) {
-        //     controller.enqueue(/* your data here */);
-        //   } else {
-        //     controller.close();
-        //   }
-        // }
-      }
-    );
+    return null;
 
-    return new Response(stream, {
-      /* your content-type here */
-      headers: { "content-type": "" }
-    });
+    // const stream = new ReadableStream(
+    //   {
+    //     // start(controller) {
+    //     //   /* there's more data */
+    //     //   if (true) {
+    //     //     controller.enqueue(/* your data here */);
+    //     //   } else {
+    //     //     controller.close();
+    //     //   }
+    //     // }
+    //   }
+    // );
+
+    // return new Response(stream, {
+    //   /* your content-type here */
+    //   headers: { "content-type": "" }
+    // });
   }
 
   _connect(url) {

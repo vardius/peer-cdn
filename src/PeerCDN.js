@@ -1,4 +1,4 @@
-import { getInstall, getActivate, getFetch } from "./handlers";
+import { getInstall, getActivate, getFetch } from "./listeners";
 import { Network, Peer } from "./plugins";
 
 export default class PeerCDN {

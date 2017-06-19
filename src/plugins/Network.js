@@ -1,7 +1,5 @@
 export default class Network {
-  constructor(options) {
-    this.chunkSize = options.chunkSize || 204800;
-
+  constructor() {
     this.getFetchMiddleware = this.getFetchMiddleware.bind(this);
   }
 
@@ -9,49 +7,35 @@ export default class Network {
   getFetchMiddleware(event) {
     return {
       get: async () => {
-        const url = new URL(event.request.url);
+        if (event.request.headers.get("range")) {
+          const response = await fetch(event.request.clone());
 
-        if (event.request.mode === "navigate")
-          return event.respondWith(fetch(event.request));
-        if (event.request.mode === "no-cors" && url.origin !== location.origin)
-          return event.respondWith(fetch(event.request));
+          return await this.getPartialResponse(event.request, response)
+        }
 
-        const mode = url.origin === location.origin ? "same-origin" : "cors";
-
-        // event.request will always have the proper mode set ('cors, 'no-cors', etc.) so we don't
-        // have to hardcode 'no-cors' like we do when fetch()ing in the install handler.
-        const request = new Request(event.request.clone(), { mode });
-        const response = await fetch(new Request(request, { method: "HEAD" }));
-
-        return await this.onHeadResponse(request, response);
+        return await fetch(event.request);
       }
     };
   }
 
-  concatArrayBuffer(ab1, ab2) {
-    const ua = new Uint8Array(ab1.byteLength + ab2.byteLength);
-    ua.set(new Uint8Array(ab1), 0);
-    ua.set(new Uint8Array(ab2), ab1.byteLength);
+  // Return the response, obeying the range header if given
+  // NOTE: Does not support 'if-range' or multiple ranges!
+  // TODO: Temporary implementation, waiting on official fix:
+  // https://github.com/whatwg/fetch/issues/144
+  // https://github.com/slightlyoff/ServiceWorker/issues/703
+  async getPartialResponse(req, res) {
+    const pos = Number(/^bytes\=(\d+)\-$/g.exec(req.headers.get("range"))[1]);
+    console.log(req);
+    const ab = await res.arrayBuffer();
+    const headers = new Headers(res.headers);
 
-    return ua.buffer;
-  }
+    headers.append("Content-Range", `bytes ${pos}-${ab.byteLength - 1}/${ab.byteLength}`);
+    headers.append("Content-Length", ab.byteLength - pos + 1);
 
-  onHeadResponse(request, response) {
-    const contentLength = response.headers.get("content-length");
-    const promises = Array.from({
-      length: Math.ceil(contentLength / this.chunkSize)
-    }).map((_, i) => {
-      const headers = new Headers(request.headers);
-      headers.append(
-        "Range",
-        `bytes=${i * this.chunkSize}-${i * this.chunkSize + this.chunkSize - 1}/${contentLength}`
-      );
-
-      return fetch(new Request(request, { headers }));
+    return new Response(ab.slice(pos), {
+      status: 206,
+      statusText: "Partial Content",
+      headers
     });
-
-    return Promise.all(promises)
-      .then(responses => Promise.all(responses.map(res => res.arrayBuffer())))
-      .then(buffers => new Response(buffers.reduce(this.concatArrayBuffer)));
   }
 }
