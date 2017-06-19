@@ -43,7 +43,7 @@ export default class Peer {
         // const responseToSeed = response.clone();
 
         // eslint-disable-next-line
-        console.log(response);
+        console.log(event, response);
 
         //todo: seed response
       }
