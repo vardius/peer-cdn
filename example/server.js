@@ -33,8 +33,14 @@ app.get("/movie.mp4", (req, res) => {
     const positions = range.replace(/bytes=/, "").split("-");
     const start = parseInt(positions[0], 10);
     const total = stats.size;
-    const end = positions[1] ? parseInt(positions[1], 10) : total - 1;
-    const chunksize = end - start + 1;
+
+    let end = positions[1] ? parseInt(positions[1], 10) : total - 1;
+    let chunksize = end - start + 1;
+    const maxChunk = 1024 * 1024; // 1MB at a time
+    if (chunksize > maxChunk) {
+      end = start + maxChunk - 1;
+      chunksize = (end - start) + 1;
+    }
 
     res.writeHead(206, {
       "Content-Range": "bytes " + start + "-" + end + "/" + total,
@@ -44,7 +50,7 @@ app.get("/movie.mp4", (req, res) => {
     });
 
     const stream = fs
-      .createReadStream(file, { start: start, end: end })
+      .createReadStream(file, { start: start, end: end, autoClose: true })
       .on("open", function() {
         stream.pipe(res);
       })

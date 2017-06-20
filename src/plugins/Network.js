@@ -8,11 +8,11 @@ export default class Network {
   getFetchMiddleware(event) {
     return {
       get: async () => {
-        if (event.request.headers.get("range")) {
-          const response = await fetch(event.request.clone());
+        // if (event.request.headers.get("range")) {
+        //   const response = await fetch(event.request.clone());
 
-          return await this.getPartialResponse(event.request, response);
-        }
+        //   return await this.getPartialResponse(event.request, response);
+        // }
 
         return await fetch(event.request);
       }

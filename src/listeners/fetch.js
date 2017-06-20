@@ -71,6 +71,9 @@ export default function getFetch(regex) {
 
     if (event.request.url.match(regex) || regex === null) {
       event.respondWith(fetchResponse(event, middlewares));
+
+//todo: add different strategy
+      //Promise.race([]);
     }
 
     // const handler = router.match(event.request);
