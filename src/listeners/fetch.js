@@ -1,60 +1,9 @@
-// Apply fetch middleware
-function applyMiddleware(...middlewares) {
-  return async event => {
-    const composed = await compose(middlewares)(event);
-    return await composed.get();
-  };
-}
-
-// Composes middleware into single object
-// Automatically skips next calls when response is not null
-// Call put method for previous middlewares with given response
-function compose(funcs) {
-  if (funcs.length === 0) {
-    return arg => ({ get: () => arg });
-  }
-
-  return funcs.reduce((a, b) => async event => {
-    const x = await a(event);
-    let response = await x.get();
-    if (response !== null) {
-      return {
-        get: () => response,
-        put: () => {}
-      };
-    }
-
-    const y = await b(event);
-    response = await y.get();
-    if (response !== null) {
-      x.put(response);
-    }
-
-    return {
-      get: () => response,
-      put: composePut(x.put, y.put)
-    };
-  });
-}
-
-// Composes put methods for previous middlewares into single one
-function composePut(...funcs) {
-  // If middleware has no put method, mock it
-  funcs = funcs.map(func => (...args) => {
-    if (typeof response === "function") {
-      func(...args);
-    }
-  });
-
-  return funcs.reduce((a, b) => (...args) => {
-    a(...args);
-    b(...args);
-  });
-}
+import { fetchOrdered } from "../scripts/middleware";
 
 async function fetchResponse(event, middlewares) {
   try {
-    return await applyMiddleware(...middlewares)(event);
+    return await fetchOrdered(...middlewares)(event);
+    // return await fetchFastest(...middlewares)(event);
   } catch (error) {
     // This catch() will handle exceptions thrown from the fetch() operation.
     // Note that a HTTP error response (e.g. 404) will NOT trigger an exception.
@@ -71,9 +20,6 @@ export default function getFetch(regex) {
 
     if (event.request.url.match(regex) || regex === null) {
       event.respondWith(fetchResponse(event, middlewares));
-
-//todo: add different strategy
-      //Promise.race([]);
     }
 
     // const handler = router.match(event.request);

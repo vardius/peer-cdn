@@ -1,4 +1,4 @@
-import applyMiddleware from "./middleware";
+import { applyMiddleware } from "../scripts/middleware";
 
 export default function getActivate(middlewares) {
   middlewares = middlewares.concat([
