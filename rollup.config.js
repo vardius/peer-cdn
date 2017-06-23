@@ -18,7 +18,8 @@ var config = {
       namedExports: {
         "node_modules/peer-data/dist/bundle.js": [
           "SocketChannel",
-          "AppEventType"
+          "AppEventType",
+          "EventDispatcher"
         ]
       }
     }),

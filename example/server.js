@@ -7,14 +7,19 @@ const fs = require("fs");
 const socketIO = require("socket.io");
 const peerData = require("peer-data");
 
+const PeerEventType = { SEED: "SEED", PEER: "PEER", DROP: "DROP" };
 const SignalingEventType = peerData.SignalingEventType;
 const port = process.env.PORT || 3000;
 const index = fspath.join(__dirname, "index.html");
 const sw = fspath.join(__dirname, "sw.js");
 
 const app = express();
-app.get("/favicon.ico", (req, res) => { res.sendStatus(404); });
-app.get("/sw.js", (req, res) => { res.sendFile(sw); });
+app.get("/favicon.ico", (req, res) => {
+  res.sendStatus(404);
+});
+app.get("/sw.js", (req, res) => {
+  res.sendFile(sw);
+});
 app.get("/movie.mp4", (req, res) => {
   const file = fspath.resolve(__dirname, "movie.mp4");
   fs.stat(file, function(err, stats) {
@@ -39,7 +44,7 @@ app.get("/movie.mp4", (req, res) => {
     const maxChunk = 1024 * 1024; // 1MB at a time
     if (chunksize > maxChunk) {
       end = start + maxChunk - 1;
-      chunksize = (end - start) + 1;
+      chunksize = end - start + 1;
     }
 
     res.writeHead(206, {
@@ -63,7 +68,9 @@ app.use("/css", express.static(fspath.join(__dirname, "css")));
 app.use("/js", express.static(fspath.join(__dirname, "js")));
 app.use("/vendor", express.static(fspath.join(__dirname, "./../dist")));
 app.use(cookieParser());
-app.get("*", (req, res) => { res.sendFile(index); });
+app.get("*", (req, res) => {
+  res.sendFile(index);
+});
 
 const server = http.createServer(app);
 const io = socketIO.listen(server);
@@ -104,6 +111,17 @@ io.on("connection", function(socket) {
       case SignalingEventType.ANSWER:
       case SignalingEventType.CANDIDATE:
         socket.broadcast.to(event.callee.id).emit("message", event);
+        break;
+      case PeerEventType.SEED:
+        socket.broadcast.to(event.callee.id).emit("message", event);
+        break;
+      case PeerEventType.PEER:
+        socket.broadcast.emit("message", event);
+        break;
+      case PeerEventType.DROP:
+        io.sockets.clients(event.room.id).forEach(client => {
+          client.leave(event.room.id);
+        });
         break;
       default:
         socket.broadcast.to(event.room.id).emit("message", event);

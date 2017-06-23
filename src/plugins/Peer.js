@@ -1,4 +1,10 @@
-import PeerData, { SocketChannel, AppEventType } from "peer-data";
+import PeerData, {
+  SocketChannel,
+  AppEventType,
+  EventDispatcher
+} from "peer-data";
+
+const PeerEventType = { SEED: "SEED", PEER: "PEER", DROP: "DROP" };
 
 export default class Peer {
   constructor(options) {
@@ -16,14 +22,18 @@ export default class Peer {
 
     this.peerData = new PeerData(servers, constraints);
     this.signaling = new SocketChannel({ jsonp: false });
+    this.promises = [];
 
     this.peerData.on(AppEventType.CHANNEL, this._onChannel.bind(this));
-    // eslint-disable-next-line
-    this.peerData.on(AppEventType.PEER, event => console.log(event));
-    // eslint-disable-next-line
-    this.peerData.on(AppEventType.ERROR, event => console.log(event));
-    // eslint-disable-next-line
-    this.peerData.on(AppEventType.LOG, event => console.log(event));
+    this.peerData.on(AppEventType.PEER, this._onPeer.bind(this));
+    this.peerData.on(AppEventType.ERROR, this._onError.bind(this));
+    this.peerData.on(AppEventType.LOG, this._onLog.bind(this));
+
+    EventDispatcher.register(
+      PeerEventType.PEER,
+      this._onPeerRequest.bind(this)
+    );
+    EventDispatcher.register(PeerEventType.SEED, this._onSeed.bind(this));
 
     this.getMiddleware = this.getMiddleware.bind(this);
   }
@@ -31,70 +41,116 @@ export default class Peer {
   // Middleware factory function for fetch event
   getMiddleware(request) {
     return {
-      get: async () => {
-        return null;
+      get: () => {
+        return this.match(request);
       },
       put: response => {
-        // IMPORTANT: Clone the response. A response is a stream
-        // and because we want the browser to consume the response
-        // as well as the cache consuming the response, we need
-        // to clone it so we have two streams.
-
-        // const responseToSeed = response.clone();
-
         // eslint-disable-next-line
-        console.log(request, response);
-
-        //todo: seed response
+        console.log(response);
       }
     };
   }
 
-  async match(request) {
-    this._connect(request.url);
-    //on connected ge
-
-    return null;
-
-    // const stream = new ReadableStream(
-    //   {
-    //     // start(controller) {
-    //     //   /* there's more data */
-    //     //   if (true) {
-    //     //     controller.enqueue(/* your data here */);
-    //     //   } else {
-    //     //     controller.close();
-    //     //   }
-    //     // }
-    //   }
-    // );
-
-    // return new Response(stream, {
-    //   /* your content-type here */
-    //   headers: { "content-type": "" }
-    // });
+  match(request) {
+    return new Promise((resolve, reject) => {
+      // do something asynchronous which eventually calls either:
+      //
+      //   resolve(someValue); // fulfilled
+      // or
+      //   reject("failure reason"); // rejected
+      this.promises[request.url] = { resolve, reject };
+      this._requestPeer(request.url);
+    });
   }
 
-  _connect(url) {
-    this.peerData.connect(url);
+  _requestPeer(url) {
+    this.dispatchEvent({
+      type: PeerEventType.PEER,
+      caller: null,
+      callee: null,
+      room: null,
+      data: url
+    });
   }
 
-  _disconnect(url) {
-    this.peerData.disconnect(url);
+  // connect to room
+  _connect(room) {
+    this.peerData.connect(room);
   }
 
+  // disconnec from room
+  _disconnect(room) {
+    this.peerData.disconnect(room);
+  }
+
+  // send data to peer
   _send(url, chunk) {
     this.peerData.send(JSON.stringify({ url, chunk }));
   }
 
+  // start connection with seeder
+  // or drop it
+  _onSeed(e) {
+    this._connect(e.room.id);
+    // this.dispatchEvent({
+    //   type: PeerEventType.DROP,
+    //   caller: e.callee,
+    //   callee: e.caller,
+    //   room: e.room,
+    //   data: e.data
+    // });
+  }
+
+  // start connection with peer
+  _onPeerRequest(e) {
+    //check if i can seed
+    const canSeed = true;
+    if (canSeed) {
+      const roomId = "a";
+      this._connect(roomId); //todo generate random hash
+      this.dispatchEvent({
+        type: PeerEventType.SEED,
+        caller: null,
+        callee: e.caller,
+        room: { id: roomId },
+        data: e.data
+      });
+    }
+  }
+
+  // on RTCPeerConnection
+  _onPeer(e) {
+    // eslint-disable-next-line
+    console.log(e);
+  }
+
+  //on RTCDataChannel
   _onChannel(e) {
     const url = e.room.id;
     const channel = e.data;
 
+    // get data from seeder
     channel.onmessage = event => {
       const data = JSON.parse(event.data);
       // eslint-disable-next-line
       console.log("Recieved chunk:", url, data.chunk);
     };
+  }
+
+  // get logs from signaling server
+  _onLog(e) {
+    // eslint-disable-next-line
+    console.log(e);
+  }
+
+  // get all errors
+  _onError(e) {
+    // eslint-disable-next-line
+    console.log(e);
+  }
+
+  // dispatch event to socket channel
+  dispatchEvent(event) {
+    EventDispatcher.dispatch("send", event);
   }
 }

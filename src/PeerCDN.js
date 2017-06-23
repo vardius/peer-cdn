@@ -25,12 +25,12 @@ export default class PeerCDN {
   }
 
   // Register handlers for give service worker instance
-  register(sw) {
-    [getInstall()].forEach(h => sw.addEventListener("install", h));
-    [getActivate()].forEach(h => sw.addEventListener("activate", h));
+  register() {
+    [getInstall()].forEach(h => self.addEventListener("install", h));
+    [getActivate()].forEach(h => self.addEventListener("activate", h));
     // Register fetch events from array.
     // When an event occurs, they're invoked one at a time, in the order that they're registered.
     // As soon as one handler calls event.respondWith(), none of the other registered handlers will be run.
-    [getFetch(this.router)].forEach(h => sw.addEventListener("fetch", h));
+    [getFetch(this.router)].forEach(h => self.addEventListener("fetch", h));
   }
 }

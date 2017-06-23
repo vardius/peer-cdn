@@ -27,7 +27,7 @@
       peerPlugin.getMiddleware(),
       networkPlugin.getMiddleware()
     );
-    cdn.register(self);
+    cdn.register();
   }
 
   run();
