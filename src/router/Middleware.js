@@ -1,10 +1,10 @@
 export default class Middleware {
   // Apply middleware fastest win
-  applyFastest(...middlewares) {
+  applyFastest(...middleware) {
     return async request => {
       const puts = [];
       const response = await Promise.race(
-        middlewares.map(factory => {
+        middleware.map(factory => {
           const middleware = factory(request);
           puts.push(middleware.put);
 
@@ -19,16 +19,16 @@ export default class Middleware {
   }
 
   // Apply middleware in order
-  applyOrdered(...middlewares) {
+  applyOrdered(...middleware) {
     return async request => {
-      const composed = await this._composePlugins(middlewares)(request);
+      const composed = await this._composePlugins(middleware)(request);
       return await composed.get();
     };
   }
 
   // Composes middleware into single object
   // Automatically skips next calls when response is not null
-  // Call put method for previous middlewares with given response
+  // Call put method for previous middleware with given response
   _composePlugins(funcs) {
     if (funcs.length === 0) {
       return arg => ({ get: () => arg });
@@ -57,7 +57,7 @@ export default class Middleware {
     });
   }
 
-  // Composes handler methods for previous middlewares into single one
+  // Composes handler methods for previous middleware into single one
   _composeHandlers(...funcs) {
     // If handler is not a function, mock it
     funcs = funcs.map(func => (...args) => {
