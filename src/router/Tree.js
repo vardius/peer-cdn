@@ -4,6 +4,7 @@ export default class Tree {
 
     this.find = this.find.bind(this);
     this.insert = this.insert.bind(this);
+    this.insert = this.insert.bind(this);
   }
 
   find(path) {

@@ -51,6 +51,16 @@ export default class Node {
     return null;
   }
 
+  getMiddleware() {
+    const middleware = this.route.middleware.slice();
+    let parentMiddleware = [];
+    if (!this.isRoot) {
+      parentMiddleware = this.parent.getMiddleware();
+    }
+
+    return parentMiddleware.concat(middleware);
+  }
+
   _isMatch(id) {
     if (this.id.startsWith(":")) {
       try {

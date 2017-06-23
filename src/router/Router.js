@@ -22,7 +22,7 @@ export default class Router {
       return null;
     }
 
-    return node.route.strategy(...node.route.middlewares);
+    return node.route.strategy(...node.getMiddleware());
   }
 
   _trimSlash(path) {
