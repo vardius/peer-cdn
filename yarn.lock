@@ -1411,13 +1411,13 @@ eslint-plugin-flowtype@^2.34.0:
   dependencies:
     lodash "^4.15.0"
 
-eslint-plugin-import@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-import/-/eslint-plugin-import-2.3.0.tgz#37c801e0ada0e296cbdf20c3f393acb5b52af36b"
+eslint-plugin-import@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-import/-/eslint-plugin-import-2.6.0.tgz#2a4bbad36a078e052a3c830ce3dfbd6b8a12c6e5"
   dependencies:
     builtin-modules "^1.1.1"
     contains-path "^0.1.0"
-    debug "^2.2.0"
+    debug "^2.6.8"
     doctrine "1.5.0"
     eslint-import-resolver-node "^0.2.0"
     eslint-module-utils "^2.0.0"
@@ -2897,9 +2897,9 @@ path-type@^2.0.0:
   dependencies:
     pify "^2.0.0"
 
-peer-data@^1.2.24:
-  version "1.2.24"
-  resolved "https://registry.yarnpkg.com/peer-data/-/peer-data-1.2.24.tgz#1662b1928e85d2ecbbdb69b7aae44ab9a76626dd"
+peer-data@^1.2.26:
+  version "1.2.26"
+  resolved "https://registry.yarnpkg.com/peer-data/-/peer-data-1.2.26.tgz#ba0ea2d774ae0a2ded1faab3b28934db2521e253"
   dependencies:
     socket.io-client "^2.0.3"
     webrtc-adapter "^4.0.1"
