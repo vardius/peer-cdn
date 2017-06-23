@@ -20,7 +20,13 @@
 
   function run() {
     const cdn = new PeerCDN();
-    cdn.all("/", STRATEGIES.ordered, cachePlugin, peerPlugin, networkPlugin);
+    cdn.all(
+      "/",
+      STRATEGIES.ordered,
+      cachePlugin.getMiddleware(),
+      peerPlugin.getMiddleware(),
+      networkPlugin.getMiddleware()
+    );
     cdn.register(self);
   }
 

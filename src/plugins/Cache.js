@@ -4,12 +4,12 @@ export default class Cache {
     // Overkill for this single cache example but this is a best practise
     this.names = { peerfetch: "peerfetch-cache-v" + version };
 
-    this.getFetchMiddleware = this.getFetchMiddleware.bind(this);
+    this.getMiddleware = this.getMiddleware.bind(this);
     this.clearOldCaches = this.clearOldCaches.bind(this);
   }
 
   // Middleware factory function for fetch event
-  getFetchMiddleware(request) {
+  getMiddleware(request) {
     return {
       get: () => {
         // caches.match() will look for a cache entry in all of the caches available to the service worker.

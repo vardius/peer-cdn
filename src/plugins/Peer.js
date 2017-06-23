@@ -25,11 +25,11 @@ export default class Peer {
     // eslint-disable-next-line
     this.peerData.on(AppEventType.LOG, event => console.log(event));
 
-    this.getFetchMiddleware = this.getFetchMiddleware.bind(this);
+    this.getMiddleware = this.getMiddleware.bind(this);
   }
 
   // Middleware factory function for fetch event
-  getFetchMiddleware(request) {
+  getMiddleware(request) {
     return {
       get: async () => {
         return null;
