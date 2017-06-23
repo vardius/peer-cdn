@@ -9,12 +9,12 @@ export default class Cache {
   }
 
   // Middleware factory function for fetch event
-  getFetchMiddleware(event) {
+  getFetchMiddleware(request) {
     return {
       get: () => {
         // caches.match() will look for a cache entry in all of the caches available to the service worker.
         // It's an alternative to first opening a specific named cache and then matching on that.
-        return caches.match(event.request).then(function(response) {
+        return caches.match(request).then(function(response) {
           if (response) {
             return response;
           }
@@ -24,7 +24,7 @@ export default class Cache {
       },
       put: response => {
         //do not chace ranged responses
-        if (event.request.headers.has("range")) {
+        if (request.headers.has("range")) {
           return;
         }
 
@@ -35,7 +35,7 @@ export default class Cache {
         const responseToCache = response.clone();
 
         caches.open(this.name).then(function(cache) {
-          const cacheRequest = event.request.clone();
+          const cacheRequest = request.clone();
           cache.put(cacheRequest, responseToCache);
         });
       }

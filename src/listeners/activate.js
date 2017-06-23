@@ -1,13 +1,5 @@
-import { applyMiddleware } from "../scripts/middleware";
-
-export default function getActivate(middlewares) {
-  middlewares = middlewares.concat([
-    function() {
-      return self.clients.claim();
-    }
-  ]);
-
+export default function getActivate() {
   return function activate(event) {
-    event.waitUntil(applyMiddleware(...middlewares)(event));
+    event.waitUntil(self.clients.claim());
   };
 }

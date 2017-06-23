@@ -29,7 +29,7 @@ export default class Peer {
   }
 
   // Middleware factory function for fetch event
-  getFetchMiddleware(event) {
+  getFetchMiddleware(request) {
     return {
       get: async () => {
         return null;
@@ -43,7 +43,7 @@ export default class Peer {
         // const responseToSeed = response.clone();
 
         // eslint-disable-next-line
-        console.log(event, response);
+        console.log(request, response);
 
         //todo: seed response
       }

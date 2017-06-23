@@ -1,8 +1,5 @@
-import { applyMiddleware } from "../scripts/middleware";
-
-export default function getInstall(middlewares) {
-  return function install(event) {
+export default function getInstall() {
+  return function install() {
     self.skipWaiting();
-    event.waitUntil(applyMiddleware(...middlewares)(event));
   };
 }
