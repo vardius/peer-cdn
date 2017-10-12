@@ -110,6 +110,7 @@ io.on("connection", function(socket) {
       case SignalingEventType.OFFER:
       case SignalingEventType.ANSWER:
       case SignalingEventType.CANDIDATE:
+      case SignalingEventType.ROOM:
         socket.broadcast.to(event.callee.id).emit("message", event);
         break;
       case PeerEventType.SEED:
@@ -137,6 +138,16 @@ io.on("connection", function(socket) {
         }
       });
     }
+  });
+
+  socket.on("disconnect", function() {
+    socket.broadcast.emit({
+      type: SignalingEventType.DISCONNECT,
+      caller: { id: socket.id },
+      callee: null,
+      room: null,
+      data: null
+    });
   });
 });
 
