@@ -40,7 +40,7 @@ export default class Middleware {
       if (response !== null) {
         return {
           get: () => response,
-          put: () => {}
+          put: () => { }
         };
       }
 

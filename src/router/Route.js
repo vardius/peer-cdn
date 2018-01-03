@@ -2,7 +2,7 @@ import Middleware from "./Middleware";
 
 export default class Route {
   constructor(strategy) {
-    this.strategy = strategy || Middleware.applyOrdered;
+    this.strategy = strategy || (new Middleware()).applyOrdered;
     this.middleware = [];
 
     this.addMiddleware = this.addMiddleware.bind(this);

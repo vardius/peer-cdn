@@ -6,7 +6,7 @@ import uglify from "rollup-plugin-uglify";
 
 var env = process.env.NODE_ENV;
 var config = {
-  format: "umd",
+  output: { format: "umd" },
   name: "peer-cdn",
   exports: "named",
   plugins: [

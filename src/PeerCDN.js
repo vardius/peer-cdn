@@ -13,16 +13,12 @@ export default class PeerCDN {
     this.all = this.all.bind(this);
     this.use = this.use.bind(this);
 
+    // Will generate functions per HTTP method
     methods.forEach(method => {
       PeerCDN.prototype[method] = (...args) => {
         this.router.use(method, ...args);
       };
     });
-  }
-
-  // Register middlewares for a given method and route with one of stategies
-  use(method, pattern, strategy, ...middleware) {
-    this.router.use(method, pattern, strategy, ...middleware);
   }
 
   // Register middlewares for a all methods and given route path with one of stategies

@@ -4,9 +4,10 @@ import PeerCDN from "./PeerCDN";
 import Middleware from "./router/Middleware";
 import { Cache, Peer, Network } from "./plugins";
 
+const middleware = new Middleware();
 const STRATEGIES = {
-  fastest: Middleware.applyFastest,
-  ordered: Middleware.applyOrdered
+  fastest: middleware.applyFastest,
+  ordered: middleware.applyOrdered
 };
 
 self.PeerCDN = PeerCDN;

@@ -1,5 +1,5 @@
-import Route from "Route";
-import Tree from "Tree";
+import Route from "./Route";
+import Tree from "./Tree";
 
 export default class Router {
   constructor() {
