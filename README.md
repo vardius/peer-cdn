@@ -14,9 +14,11 @@ Lightweight library providing peer to peer CDN functionality
 - [x] Setup sw peer fetch
 - [x] Setup sw network fetch
 - [x] Use peer-data
-- [ ] Create peers match algorithm
-- [ ] Create peers fetch algorithm
-- [ ] Setup signaling socket.io server
+- [x] Create peers match algorithm
+- [x] Create peers fetch algorithm
+- [x] Setup signaling socket.io server
+- [ ] Test if current implementation works
+- [ ] Refactor peer matching to lower number of connections
 
 ## Contribution
 
