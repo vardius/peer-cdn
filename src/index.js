@@ -1,4 +1,5 @@
 import "babel-polyfill/dist/polyfill";
+
 import PeerCDN from "./PeerCDN";
 import Middleware from "./router/Middleware";
 import { Cache, Peer, Network } from "./plugins";

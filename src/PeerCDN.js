@@ -10,6 +10,8 @@ export default class PeerCDN {
   constructor() {
     this.router = new Router();
     this.register = this.register.bind(this);
+    this.all = this.all.bind(this);
+    this.use = this.use.bind(this);
 
     methods.forEach(method => {
       PeerCDN.prototype[method] = (...args) => {
@@ -18,13 +20,17 @@ export default class PeerCDN {
     });
   }
 
-  all(...args) {
-    methods.forEach(method => {
-      this.router.use(method, ...args);
-    });
+  // Register middlewares for a given method and route with one of stategies
+  use(method, pattern, strategy, ...middleware) {
+    this.router.use(method, pattern, strategy, ...middleware);
   }
 
-  // Register handlers for give service worker instance
+  // Register middlewares for a all methods and given route path with one of stategies
+  all(...args) {
+    methods.forEach(method => this.use(method, ...args));
+  }
+
+  // Register handlers for given service worker instance
   register() {
     [getInstall()].forEach(h => self.addEventListener("install", h));
     [getActivate()].forEach(h => self.addEventListener("activate", h));
