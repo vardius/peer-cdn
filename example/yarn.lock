@@ -324,12 +324,15 @@ path-to-regexp@0.1.7:
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-0.1.7.tgz#df604178005f522f15eb4490e7247a1bfaa67f8c"
 
-peer-data@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/peer-data/-/peer-data-2.0.0.tgz#c094b5df8b4c165ac3280b5a3dc598c25531a21f"
+peer-data-server@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/peer-data-server/-/peer-data-server-1.0.8.tgz#eba588e6dc2a9255fb4995cbc60afcab078848c9"
+
+peer-data@^3.0.23:
+  version "3.0.23"
+  resolved "https://registry.yarnpkg.com/peer-data/-/peer-data-3.0.23.tgz#21850b2ff0e9acc37dbfcdba14014e2b08d65bc6"
   dependencies:
-    socket.io-client "^2.0.3"
-    webrtc-adapter "^4.0.2"
+    webrtc-adapter "^6.0.1"
 
 proxy-addr@~1.1.4:
   version "1.1.4"
@@ -346,13 +349,19 @@ range-parser@~1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/range-parser/-/range-parser-1.2.0.tgz#f49be6b487894ddc40dcc94a322f611092e00d5e"
 
+rtcpeerconnection-shim@^1.1.13:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/rtcpeerconnection-shim/-/rtcpeerconnection-shim-1.2.4.tgz#5b178f57d35fe88e423c50d28d7507ececc9f3b2"
+  dependencies:
+    sdp "^2.2.0"
+
 safe-buffer@~5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.0.1.tgz#d263ca54696cd8a306b5ca6551e92de57918fbe7"
 
-sdp@^2.1.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/sdp/-/sdp-2.2.0.tgz#2418182d53ca7a248afacb2e029f06c251c280b7"
+sdp@^2.2.0, sdp@^2.3.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/sdp/-/sdp-2.5.0.tgz#b15a0b1dfd0a38f6a8c780e58f8c8fe73c29ffe5"
 
 send@0.15.3:
   version "0.15.3"
@@ -391,7 +400,7 @@ socket.io-adapter@~1.1.0:
   dependencies:
     debug "2.3.3"
 
-socket.io-client@^2.0.3, socket.io-client@~2.0.2:
+socket.io-client@~2.0.2:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/socket.io-client/-/socket.io-client-2.0.3.tgz#6caf4aff9f85b19fd91b6ce13d69adb564f8873b"
   dependencies:
@@ -464,11 +473,12 @@ vary@~1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.1.tgz#67535ebb694c1d52257457984665323f587e8d37"
 
-webrtc-adapter@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/webrtc-adapter/-/webrtc-adapter-4.0.2.tgz#f9d1d0604d7937766fb4b672ba235af70feada2b"
+webrtc-adapter@^6.0.1:
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/webrtc-adapter/-/webrtc-adapter-6.0.3.tgz#850ab1649099922086c2c038c87c10c46d0c42cc"
   dependencies:
-    sdp "^2.1.0"
+    rtcpeerconnection-shim "^1.1.13"
+    sdp "^2.3.0"
 
 ws@~2.3.1:
   version "2.3.1"

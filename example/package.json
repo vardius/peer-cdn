@@ -1,5 +1,5 @@
 {
-  "name": "peer-cdn",
+  "name": "peer-cdn-example",
   "version": "1.0.0",
   "description": "PeerCDN webpack example",
   "scripts": {
