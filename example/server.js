@@ -67,7 +67,8 @@ app.get("/movie.mp4", (req, res) => {
 
 const server = http.createServer(app);
 
-PeerDataServer(server);
+const createPeerDataServer = PeerDataServer.default || PeerDataServer;
+createPeerDataServer(server);
 
 server.listen(port, () => {
   // eslint-disable-next-line no-console
