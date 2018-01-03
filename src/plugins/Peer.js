@@ -1,123 +1,127 @@
-import PeerData, { SocketChannel, EventDispatcher } from "peer-data";
+import PeerData, { SocketChannel } from "peer-data";
 
-const PeerEventType = { SEED: "SEED", PEER: "PEER", DROP: "DROP" };
+const defaults = {
+  servers: {
+    iceServers: [
+      {
+        // url: "stun:stun.1.google.com:19302"
+        url: "stun:74.125.142.127:19302"
+      }
+    ]
+  },
+  constraints: {
+    ordered: true
+  },
+  socket: {
+    jsonp: false
+  }
+};
 
 export default class Peer {
   constructor(options) {
-    const servers = options.servers || {
-      iceServers: [
-        {
-          // url: "stun:stun.1.google.com:19302"
-          url: "stun:74.125.142.127:19302"
-        }
-      ]
-    };
-    const constraints = options.constraints || {
-      ordered: true
-    };
-
-    this.peerData = new PeerData(servers, constraints);
-    this.signaling = new SocketChannel({ jsonp: false });
-    this.promises = [];
-
+    this.rooms = {};
+    this.peers = {};
+    // Timeout after 1500 ms by default
+    this.timeoutAfter = options.timeoutAfter || 1500;
     this.getMiddleware = this.getMiddleware.bind(this);
+    this.connect = this.connect.bind(this);
 
-    this.peerData.onConnection(this._onConnection.bind(this));
-    EventDispatcher.register(PeerEventType.PEER, this._onPeer.bind(this));
-    EventDispatcher.register(PeerEventType.SEED, this._onSeed.bind(this));
-    EventDispatcher.register(PeerEventType.DROP, this._onDrop.bind(this));
+    // setup peer client 
+    this.peerData = new PeerData(
+      options.servers || defaults.servers,
+      options.constraints || defaults.constraints
+    );
+    // setup signaling channel
+    this.signaling = new SocketChannel(
+      options.socket || defaults.socket
+    );
   }
 
   // Middleware factory function for fetch event
   getMiddleware(request) {
     return {
-      get: () => {
-        return this.match(request);
+      get: async () => {
+        try {
+          // this.match() will look for an entry in all of the peers available to the service worker.
+          const response = await this.match(request);
+          if (response) {
+            return response;
+          }
+
+          return null;
+        } catch (e) {
+          return null;
+        }
       },
-      put: response => {
-        // eslint-disable-next-line
-        console.log(response);
+      put: response => { // todo: response -> ()
+        // do not seed ranged responses
+        // https://github.com/vardius/peer-cdn/issues/7
+        if (request.headers.has("range")) {
+          return;
+        }
+
+        // this.seed() will w8 for an response request
+        // by other peers available to the service worker
+        // and share response (taken from cache)
+        this.seed(request.url, response); // todo: find response in cache, we do not want to store it in memory
+
+        // IMPORTANT: Clone the response. A response is a stream
+        // and because we want the browser to consume the response
+        // as well as the peer client consuming the response, we need
+        // to clone it so we have two streams.
+        return response.clone();
       }
     };
   }
 
   match(request) {
     return new Promise((resolve, reject) => {
-      // do something asynchronous which eventually calls either:
-      //
-      //   resolve(someValue); // fulfilled
-      // or
-      //   reject("failure reason"); // rejected
-      this.promises[request.url] = { resolve, reject };
+      this.rooms[request.url].send({ isSeedRequest: true });
+      this.peers[request.url].forEach(peer => peer.on("message", payload => {
+        if (!payload.isChunk) {
+          return;
+        }
 
-      this.dispatchEvent({
-        type: PeerEventType.PEER,
-        caller: null,
-        callee: null,
-        room: null,
-        data: request.url
-      });
+        resolve(payload);
+      }));
+
+      // Set up the timeout
+      setTimeout(function () {
+        reject('Promise timed out after ' + this.timeoutAfter + ' ms');
+      }, this.timeoutAfter);
     });
   }
 
-  // some peer needs seeders
-  // lets offer us if we have a resource
-  _onPeer(e) {
-    //check if i can seed
-    const canSeed = true;
-    if (canSeed) {
-      const roomId = "a";
-      this.peerData.connect(roomId); //todo generate random hash
-      this.dispatchEvent({
-        type: PeerEventType.SEED,
-        caller: null,
-        callee: e.caller,
-        room: { id: roomId },
-        data: e.data
+  seed(request, response) {
+    this.peers[request.url].forEach(peer => peer.on("message", payload => {
+      if (!payload.isSeedRequest) {
+        return;
+      }
+
+      // find response in cache and seed it
+      peer.send({ isChunk: true, response });
+    }));
+  }
+
+  connect(request) {
+    this.peers[request.url] = this.peers[request.url] || [];
+    this.rooms[request.url] = this.rooms[request.url] || this.peerData.connect(request.url);
+
+    this.rooms[request.url].on("participant", promise => {
+      promise.then(peer => {
+        this.peers[request.url].push(peer);
+
+        // this peer disconnected from room
+        peer.on("disconnected", () => {
+          const index = this.peers[request.url].indexOf(peer);
+          if (index > -1) {
+            this.peers[request.url].splice(index, 1);
+          }
+        });
+
+        // renegotiate if there was an error
+        peer.on("error", () => peer.renegotiate());
       });
-    }
-  }
-
-  // we got seeder offer
-  // pick him or drop him
-  _onSeed(e) {
-    this.peerData.connect(e.room.id);
-    // this.dispatchEvent({
-    //   type: PeerEventType.DROP,
-    //   caller: e.callee,
-    //   callee: e.caller,
-    //   room: e.room,
-    //   data: e.data
-    // });
-  }
-
-  // peer doesn't want us to seed for him
-  _onDrop(e) {
-    this.peerData.disconnect(e.room.id);
-  }
-
-  // on RTCPeerConnection || RTCDataChannel
-  _onConnection(promise) {
-    // eslint-disable-next-line
-    console.log(promise);
-
-    promise.then(({ channel, room, caller, peer }) => {
-      // get data from seeder
-      channel.onmessage = event => {
-        const data = JSON.parse(event.data);
-        // eslint-disable-next-line
-        console.log("Recieved chunk:", url, data.chunk);
-      };
-
-      // // send message
-      // if (channel.readyState === "open") {
-      //   channel.send(data);
-      // }
     });
-  }
-
-  // dispatch event to socket channel
-  dispatchEvent(event) {
-    EventDispatcher.dispatch("send", event);
   }
 }

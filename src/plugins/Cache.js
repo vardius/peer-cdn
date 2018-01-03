@@ -23,7 +23,8 @@ export default class Cache {
         });
       },
       put: response => {
-        //do not chace ranged responses
+        // do not cache ranged responses
+        // https://github.com/vardius/peer-cdn/issues/7
         if (request.headers.has("range")) {
           return;
         }

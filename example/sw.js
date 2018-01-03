@@ -1,7 +1,7 @@
-(function() {
+(function () {
   "use strict";
-  //todo: use min
-  self.importScripts("/vendor/peer-cdn.js");
+
+  self.importScripts("/vendor/peer-cdn.min.js");
 
   const cachePlugin = new CachePlugin({ version: 1 });
   const peerPlugin = new PeerPlugin({

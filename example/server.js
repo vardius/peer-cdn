@@ -2,27 +2,27 @@ const express = require("express");
 const fspath = require("path");
 const cookieParser = require("cookie-parser");
 const http = require("http");
-const os = require("os");
 const fs = require("fs");
-const socketIO = require("socket.io");
-const peerData = require("peer-data");
+const PeerDataServer = require("peer-data-server");
 
-const PeerEventType = { SEED: "SEED", PEER: "PEER", DROP: "DROP" };
-const SignalingEventType = peerData.SignalingEventType;
 const port = process.env.PORT || 3000;
 const index = fspath.join(__dirname, "index.html");
 const sw = fspath.join(__dirname, "sw.js");
 
 const app = express();
-app.get("/favicon.ico", (req, res) => {
-  res.sendStatus(404);
-});
-app.get("/sw.js", (req, res) => {
-  res.sendFile(sw);
-});
+app.get("/sw.js", (req, res) => res.sendFile(sw));
+app.use("/css", express.static(fspath.join(__dirname, "css")));
+app.use("/fonts", express.static(fspath.join(__dirname, "fonts")));
+app.use("/images", express.static(fspath.join(__dirname, "images")));
+app.use("/js", express.static(fspath.join(__dirname, "js")));
+app.use("/vendor", express.static(fspath.join(__dirname, "./../dist")));
+app.use(cookieParser());
+app.get("/favicon.ico", (req, res) => res.sendStatus(404));
+app.get("*", (req, res) => res.sendFile(index));
+
 app.get("/movie.mp4", (req, res) => {
   const file = fspath.resolve(__dirname, "movie.mp4");
-  fs.stat(file, function(err, stats) {
+  fs.stat(file, function (err, stats) {
     if (err) {
       if (err.code === "ENOENT") {
         // 404 Error if file not found
@@ -56,100 +56,18 @@ app.get("/movie.mp4", (req, res) => {
 
     const stream = fs
       .createReadStream(file, { start: start, end: end, autoClose: true })
-      .on("open", function() {
+      .on("open", function () {
         stream.pipe(res);
       })
-      .on("error", function(err) {
+      .on("error", function (err) {
         res.end(err);
       });
   });
 });
-app.use("/css", express.static(fspath.join(__dirname, "css")));
-app.use("/js", express.static(fspath.join(__dirname, "js")));
-app.use("/vendor", express.static(fspath.join(__dirname, "./../dist")));
-app.use(cookieParser());
-app.get("*", (req, res) => {
-  res.sendFile(index);
-});
 
 const server = http.createServer(app);
-const io = socketIO.listen(server);
-io.on("connection", function(socket) {
-  function log() {
-    socket.emit("log", ...arguments);
-  }
 
-  function onConnect(id) {
-    // eslint-disable-next-line no-console
-    console.log(`Client ${socket.id} connected to room: ${id}`);
-    socket.join(id);
-  }
-
-  function onDisconnect(id) {
-    // eslint-disable-next-line no-console
-    console.log(`Client ${socket.id} disconnected from room: ${id}`);
-    socket.leave(id);
-  }
-
-  socket.on("message", function(event) {
-    event.caller = {
-      id: socket.id
-    };
-
-    log("SERVER_LOG", event);
-
-    switch (event.type) {
-      case SignalingEventType.CONNECT:
-        onConnect(event.room.id);
-        socket.broadcast.to(event.room.id).emit("message", event);
-        break;
-      case SignalingEventType.DISCONNECT:
-        onDisconnect(event.room.id);
-        socket.broadcast.to(event.room.id).emit("message", event);
-        break;
-      case SignalingEventType.OFFER:
-      case SignalingEventType.ANSWER:
-      case SignalingEventType.CANDIDATE:
-      case SignalingEventType.ROOM:
-        socket.broadcast.to(event.callee.id).emit("message", event);
-        break;
-      case PeerEventType.SEED:
-        socket.broadcast.to(event.callee.id).emit("message", event);
-        break;
-      case PeerEventType.PEER:
-        socket.broadcast.emit("message", event);
-        break;
-      case PeerEventType.DROP:
-        io.sockets.clients(event.room.id).forEach(client => {
-          client.leave(event.room.id);
-        });
-        break;
-      default:
-        socket.broadcast.to(event.room.id).emit("message", event);
-    }
-  });
-
-  socket.on("ipaddr", function() {
-    var ifaces = os.networkInterfaces();
-    for (var dev in ifaces) {
-      ifaces[dev].forEach(function(details) {
-        if (details.family === "IPv4" && details.address !== "127.0.0.1") {
-          socket.emit("ipaddr", details.address);
-        }
-      });
-    }
-  });
-
-  socket.on("disconnect", function() {
-    socket.broadcast.emit({
-      type: SignalingEventType.DISCONNECT,
-      caller: { id: socket.id },
-      callee: null,
-      room: null,
-      data: null
-    });
-  });
-});
+PeerDataServer(server);
 
 server.listen(port, () => {
   // eslint-disable-next-line no-console
