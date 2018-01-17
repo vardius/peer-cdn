@@ -1,2 +1,6 @@
+**/coverage/**
 **/dist/**
+**/es/**
+**/example/**
+**/lib/**
 **/node_modules/**

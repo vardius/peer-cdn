@@ -53,7 +53,9 @@ export default class Peer {
           return null;
         }
       },
-      put: response => { // todo: response -> ()
+      // todo: response -> () track that we can share this response
+      // we should begin peer connection in constructor and based on tracked url know what we can share
+      put: response => {
         // do not seed ranged responses
         // https://github.com/vardius/peer-cdn/issues/7
         if (request.headers.has("range")) {

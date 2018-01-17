@@ -31,28 +31,30 @@ export default class Middleware {
   // Call put method for previous middleware with given response
   _composePlugins(funcs) {
     if (funcs.length === 0) {
-      return arg => ({ get: () => arg });
+      return () => ({ get: () => null, put: () => { } });
     }
 
     return funcs.reduce((a, b) => async request => {
-      const x = a(request);
+      const x = await a(request);
       let response = await x.get();
       if (response !== null) {
+        // pass response to put method
+        x.put(response);
+
         return {
           get: () => response,
+          // plugin worked (means had response saved)
+          // so we do not have to store this response
           put: () => { }
         };
       }
 
-      const y = b(request);
+      const y = await b(request);
       response = await y.get();
-      if (response !== null) {
-        x.put(response);
-      }
 
       return {
         get: () => response,
-        put: this._composeHandlers(x.put, y.put)
+        put: this._composeHandlers(y.put.x.put)
       };
     });
   }

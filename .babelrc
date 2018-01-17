@@ -18,6 +18,12 @@
     "transform-es3-property-literals"
   ],
   "env": {
+    "test": {
+      "plugins": [
+        "transform-runtime",
+        "transform-es2015-modules-commonjs"
+      ]
+    },
     "commonjs": {
       "plugins": [
         [
