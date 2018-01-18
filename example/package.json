@@ -18,7 +18,7 @@
     "cookie-parser": "1.4.3",
     "express": "^4.15.3",
     "peer-data": "^3.0.23",
-    "peer-data-server": "^1.0.8",
+    "peer-data-server": "^1.0.9",
     "socket.io": "^2.0.2"
   },
   "devDependencies": {}
