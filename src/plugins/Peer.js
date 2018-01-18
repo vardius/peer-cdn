@@ -1,5 +1,6 @@
-import PeerData, { SocketChannel } from "peer-data";
+import PeerData, { SocketChannel, EventDispatcher } from "peer-data";
 
+const PeerEventType = { PEER: "PEER" };
 const defaults = {
   servers: {
     iceServers: [
@@ -19,12 +20,10 @@ const defaults = {
 
 export default class Peer {
   constructor(options) {
-    this.rooms = {};
-    this.peers = {};
     // Timeout after 1500 ms by default
     this.timeoutAfter = options.timeoutAfter || 1500;
     this.getMiddleware = this.getMiddleware.bind(this);
-    this.connect = this.connect.bind(this);
+    this._match = this._match.bind(this);
 
     // setup peer client 
     this.peerData = new PeerData(
@@ -35,6 +34,8 @@ export default class Peer {
     this.signaling = new SocketChannel(
       options.socket || defaults.socket
     );
+
+    EventDispatcher.register(PeerEventType.PEER, this._onPeerRequest.bind(this));
   }
 
   // Middleware factory function for fetch event
@@ -42,8 +43,8 @@ export default class Peer {
     return {
       get: async () => {
         try {
-          // this.match() will look for an entry in all of the peers available to the service worker.
-          const response = await this.match(request);
+          // this._match() will look for an entry in all of the peers available to the service worker.
+          const response = await this._match(request);
           if (response) {
             return response;
           }
@@ -52,78 +53,63 @@ export default class Peer {
         } catch (e) {
           return null;
         }
-      },
-      // todo: response -> () track that we can share this response
-      // we should begin peer connection in constructor and based on tracked url know what we can share
-      put: response => {
-        // do not seed ranged responses
-        // https://github.com/vardius/peer-cdn/issues/7
-        if (request.headers.has("range")) {
-          return;
-        }
-
-        // this.seed() will w8 for an response request
-        // by other peers available to the service worker
-        // and share response (taken from cache)
-        this.seed(request.url, response); // todo: find response in cache, we do not want to store it in memory
-
-        // IMPORTANT: Clone the response. A response is a stream
-        // and because we want the browser to consume the response
-        // as well as the peer client consuming the response, we need
-        // to clone it so we have two streams.
-        return response.clone();
       }
     };
   }
 
-  match(request) {
+  _match(request) {
     return new Promise((resolve, reject) => {
-      this.rooms[request.url].send({ isSeedRequest: true });
-      this.peers[request.url].forEach(peer => peer.on("message", payload => {
-        if (!payload.isChunk) {
-          return;
-        }
+      const roomId = '';
+      const room = this.peerData.connect(roomId);
 
-        resolve(payload);
-      }));
+      room.on("participant", promise => {
+        promise.then(peer => {
+          peer.on("message", payload => {
+            if (!payload) {
+              return;
+            }
+
+            // todo: handle chunk request
+            // https://github.com/vardius/peer-cdn/issues/7
+            room.disconnect();
+            resolve(payload);
+          });
+
+          // renegotiate if there was an error
+          peer.on("error", () => peer.renegotiate());
+        });
+      });
+
+      EventDispatcher.dispatch("send", {
+        type: PeerEventType.PEER,
+        caller: null,
+        callee: null,
+        room: { id: roomId },
+        data: request.clone(),
+      });
 
       // Set up the timeout
       setTimeout(function () {
+        room.disconnect();
         reject('Promise timed out after ' + this.timeoutAfter + ' ms');
       }, this.timeoutAfter);
     });
   }
 
-  seed(request, response) {
-    this.peers[request.url].forEach(peer => peer.on("message", payload => {
-      if (!payload.isSeedRequest) {
-        return;
+  _onPeerRequest(e) {
+    // caches.match() will look for a cache entry in all of the caches available to the service worker.
+    caches.match(e.data).then(response => {
+      if (response) {
+        // signaling server needs us to seed
+        // we will connected to a given room
+        const room = this.peerData.connect(e.room.id);
+        room.on("participant", promise => promise.then(peer => {
+          //this peer disconnected from room
+          peer.on("disconnected", () => room.disconnect());
+          // send the response
+          peer.send(response);
+        }));
       }
-
-      // find response in cache and seed it
-      peer.send({ isChunk: true, response });
-    }));
-  }
-
-  connect(request) {
-    this.peers[request.url] = this.peers[request.url] || [];
-    this.rooms[request.url] = this.rooms[request.url] || this.peerData.connect(request.url);
-
-    this.rooms[request.url].on("participant", promise => {
-      promise.then(peer => {
-        this.peers[request.url].push(peer);
-
-        // this peer disconnected from room
-        peer.on("disconnected", () => {
-          const index = this.peers[request.url].indexOf(peer);
-          if (index > -1) {
-            this.peers[request.url].splice(index, 1);
-          }
-        });
-
-        // renegotiate if there was an error
-        peer.on("error", () => peer.renegotiate());
-      });
     });
   }
 }

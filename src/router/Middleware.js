@@ -31,7 +31,7 @@ export default class Middleware {
   // Call put method for previous middleware with given response
   _composePlugins(funcs) {
     if (funcs.length === 0) {
-      return () => ({ get: () => null, put: () => { } });
+      return () => ({ get: () => null });
     }
 
     return funcs.reduce((a, b) => async request => {
@@ -39,13 +39,10 @@ export default class Middleware {
       let response = await x.get();
       if (response !== null) {
         // pass response to put method
-        x.put(response);
+        x.put && x.put(response);
 
         return {
           get: () => response,
-          // plugin worked (means had response saved)
-          // so we do not have to store this response
-          put: () => { }
         };
       }
 

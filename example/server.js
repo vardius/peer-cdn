@@ -5,6 +5,7 @@ const http = require("http");
 const fs = require("fs");
 const PeerDataServer = require("peer-data-server");
 
+const PeerEventType = { PEER: "PEER" };
 const port = process.env.PORT || 3000;
 const index = fspath.join(__dirname, "index.html");
 const sw = fspath.join(__dirname, "sw.js");
@@ -68,7 +69,16 @@ app.get("/movie.mp4", (req, res) => {
 const server = http.createServer(app);
 
 const createPeerDataServer = PeerDataServer.default || PeerDataServer;
-createPeerDataServer(server);
+createPeerDataServer(server, function (socket, event) {
+  switch (event.type) {
+    case PeerEventType.PEER:
+      // we should pick best peer and ask only one socket to connect
+      socket.broadcast.emit("message", event);
+      break;
+    default:
+      socket.broadcast.to(event.room.id).emit("message", event);
+  }
+});
 
 server.listen(port, () => {
   // eslint-disable-next-line no-console

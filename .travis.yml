@@ -2,7 +2,7 @@ language: node_js
 node_js:
   - "node"
 script:
-  - yarn run test:cov
+  - yarn run test:cov && codecov
   - yarn run lint
 before_install:
   - npm install -g yarn
