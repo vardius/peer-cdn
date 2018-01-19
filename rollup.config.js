@@ -3,6 +3,8 @@ import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
 import replace from 'rollup-plugin-replace';
 import uglify from "rollup-plugin-uglify";
+import gzip from "rollup-plugin-gzip";
+import filesize from 'rollup-plugin-filesize';
 
 var env = process.env.NODE_ENV;
 var config = {
@@ -44,7 +46,9 @@ if (env === 'production') {
         unsafe_comps: true,
         warnings: false
       }
-    })
+    }),
+    gzip(),
+    filesize(),
   );
 }
 
