@@ -34,8 +34,8 @@ describe("Middleware", () => {
         expect(response).toEqual('world');
         expect(calledPut).toEqual([2, 1]);
       },
-      function () {
-        expect(true).toEqual('Compiled middleware promise failed');
+      function (e) {
+        expect('Compiled order middleware promise failed').toEqual(e);
       }
     );
   });
@@ -73,8 +73,8 @@ describe("Middleware", () => {
         expect(response).toEqual('world');
         expect(calledPut.length).toEqual(3);
       },
-      function () {
-        expect(true).toEqual('Compiled middleware promise failed');
+      function (e) {
+        expect('Compiled fastest middleware promise failed').toEqual(e);
       }
     );
   });

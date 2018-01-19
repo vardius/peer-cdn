@@ -51,7 +51,7 @@ export default class Middleware {
 
       return {
         get: () => response,
-        put: this._composeHandlers(y.put.x.put)
+        put: this._composeHandlers(y.put, x.put)
       };
     });
   }

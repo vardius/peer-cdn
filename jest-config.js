@@ -1,9 +1,8 @@
 module.exports = {
-  rootDir: 'test/',
-  verbose: true,
-  collectCoverage: true,
-  coverageDirectory: '<rootDir>/../coverage',
-  collectCoverageFrom: ['<rootDir>/../src/**/*.js'],
+  collectCoverageFrom: [
+    'src/**/*.{js}',
+    '!src/**/*.test.{js,jsx}',
+  ],
   coverageThreshold: {
     global: {
       statements: 98,
@@ -12,4 +11,9 @@ module.exports = {
       lines: 98,
     },
   },
+  moduleDirectories: [
+    'node_modules',
+    'src',
+  ],
+  testRegex: 'test/.*\\.spec\\.js$',
 };

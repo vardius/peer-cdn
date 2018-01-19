@@ -20,9 +20,8 @@
 
   function run() {
     const cdn = new PeerCDN();
-    cdn.all(
-      "/",
-      STRATEGIES.ordered,
+    cdn.all("/", STRATEGIES.ordered,
+      // all of the following plugins are required
       cachePlugin.getMiddleware(),
       peerPlugin.getMiddleware(),
       networkPlugin.getMiddleware()

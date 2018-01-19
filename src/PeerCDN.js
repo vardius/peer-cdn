@@ -14,15 +14,15 @@ export default class PeerCDN {
 
     // Will generate functions per HTTP method
     methods.forEach(method => {
-      PeerCDN.prototype[method] = (...args) => {
-        this.router.use(method, ...args);
+      PeerCDN.prototype[method] = (path, strategy, ...middleware) => {
+        this.router.use(method, path, strategy, ...middleware);
       };
     });
   }
 
   // Register middlewares for a all methods and given route path with one of stategies
-  all(...args) {
-    methods.forEach(method => this.router.use(method, ...args));
+  all(path, strategy, ...middleware) {
+    methods.forEach(method => this.router.use(method, path, strategy, ...middleware));
   }
 
   // Register handlers for given service worker instance

@@ -1,14 +1,14 @@
-import resolve from "rollup-plugin-node-resolve";
-import babel from "rollup-plugin-babel";
-import commonjs from "rollup-plugin-commonjs";
-import replace from "rollup-plugin-replace";
+import resolve from 'rollup-plugin-node-resolve';
+import babel from 'rollup-plugin-babel';
+import commonjs from 'rollup-plugin-commonjs';
+import replace from 'rollup-plugin-replace';
 import uglify from "rollup-plugin-uglify";
 
 var env = process.env.NODE_ENV;
 var config = {
-  output: { format: "umd" },
-  name: "peer-cdn",
-  exports: "named",
+  output: { format: 'umd' },
+  name: 'peer-cdn',
+  exports: 'named',
   plugins: [
     resolve({
       jsnext: true,
@@ -16,23 +16,26 @@ var config = {
     }),
     commonjs({
       namedExports: {
-        "node_modules/peer-data/dist/bundle.js": [
-          "SocketChannel",
-          "AppEventType",
-          "EventDispatcher"
+        'node_modules/peer-data/dist/bundle.js': [
+          'SocketChannel',
+          'AppEventType',
+          'EventDispatcher',
+        ],
+        'node_modules/methods/index.js': [
+          'forEach',
         ]
       }
     }),
     babel({
-      exclude: "node_modules/**"
+      exclude: 'node_modules/**'
     }),
     replace({
-      "process.env.NODE_ENV": JSON.stringify(env)
+      'process.env.NODE_ENV': JSON.stringify(env)
     })
   ]
 };
 
-if (env === "production") {
+if (env === 'production') {
   config.plugins.push(
     uglify({
       compress: {
