@@ -22,9 +22,9 @@
     const cdn = new PeerCDN();
     cdn.all("/", STRATEGIES.ordered,
       // all of the following plugins are required
-      cachePlugin.getMiddleware(),
-      peerPlugin.getMiddleware(),
-      networkPlugin.getMiddleware()
+      cachePlugin.getMiddleware,
+      peerPlugin.getMiddleware,
+      networkPlugin.getMiddleware
     );
     cdn.register();
   }
