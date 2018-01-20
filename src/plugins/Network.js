@@ -6,9 +6,7 @@ export default class Network {
   // Middleware factory function for fetch event
   getMiddleware(request) {
     return {
-      get: async () => {
-        return await fetch(request);
-      }
+      get: async () => await fetch(request)
     };
   }
 }

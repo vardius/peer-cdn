@@ -23,9 +23,6 @@ var config = {
           'AppEventType',
           'EventDispatcher',
         ],
-        'node_modules/methods/index.js': [
-          'forEach',
-        ]
       }
     }),
     babel({

@@ -6,19 +6,25 @@ export default class Router {
     this.tree = new Tree();
 
     this.use = this.use.bind(this);
-    this.fetch = this.fetch.bind(this);
+    this.getHandler = this.getHandler.bind(this);
+    this._trimSlash = this._trimSlash.bind(this);
   }
 
   use(method, pattern, strategy, ...middleware) {
-    const path = method + "/" + this._trimSlash(pattern);
+    const path = this._trimSlash(method.toUpperCase() + "/" + this._trimSlash(pattern));
     const node = this.tree.insert(path);
+
     node.route = new Route(strategy);
     node.route.addMiddleware(middleware);
   }
 
-  getHandler(url) {
-    const node = this.tree.find(this._trimSlash(url));
+  getHandler(method, path) {
+    let node = this.tree.find(this._trimSlash(method.toUpperCase() + "/" + this._trimSlash(path)));
     if (!node) {
+      node = this.tree.find(this._trimSlash(method.toUpperCase()));
+    }
+
+    if (!node || !node.route) {
       return null;
     }
 

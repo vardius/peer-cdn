@@ -2,7 +2,7 @@ import Node from "./Node";
 
 export default class Tree {
   constructor() {
-    this.root = new Node("", null);
+    this.root = new Node("root", null);
 
     this.find = this.find.bind(this);
     this.insert = this.insert.bind(this);

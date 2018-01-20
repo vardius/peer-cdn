@@ -1,4 +1,11 @@
 export default class Middleware {
+  constructor() {
+    this.applyFastest = this.applyFastest.bind(this);
+    this.applyOrdered = this.applyOrdered.bind(this);
+    this._composePlugins = this._composePlugins.bind(this);
+    this._composeHandlers = this._composeHandlers.bind(this);
+  }
+
   // Apply middleware fastest win
   applyFastest(...middleware) {
     return async request => {
@@ -22,7 +29,11 @@ export default class Middleware {
   applyOrdered(...middleware) {
     return async request => {
       const composed = await this._composePlugins(middleware)(request);
-      return await composed.get();
+      const response = await composed.get();
+
+      composed.put && composed.put(response);
+
+      return response;
     };
   }
 

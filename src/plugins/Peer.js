@@ -20,6 +20,8 @@ const defaults = {
 
 export default class Peer {
   constructor(options) {
+    // cahce name to get the response from
+    this.cacheName = options.cacheName;
     // Timeout after 1500 ms by default
     this.timeoutAfter = options.timeoutAfter || 1500;
     this.getMiddleware = this.getMiddleware.bind(this);
@@ -35,13 +37,19 @@ export default class Peer {
       options.socket || defaults.socket
     );
 
-    EventDispatcher.register(PeerEventType.PEER, this._onPeerRequest.bind(this));
+    EventDispatcher.getInstance().register(PeerEventType.PEER, this._onPeerRequest.bind(this));
   }
 
   // Middleware factory function for fetch event
   getMiddleware(request) {
     return {
       get: async () => {
+        // do not cache ranged responses
+        // https://github.com/vardius/peer-cdn/issues/7
+        if (request.headers.has("range")) {
+          return null;
+        }
+
         try {
           // this._match() will look for an entry in all of the peers available to the service worker.
           const response = await this._match(request);
@@ -80,12 +88,13 @@ export default class Peer {
         });
       });
 
-      EventDispatcher.dispatch("send", {
+      const url = new URL(request.url);
+      EventDispatcher.getInstance().dispatch("send", {
         type: PeerEventType.PEER,
         caller: null,
         callee: null,
         room: { id: roomId },
-        data: request.clone(),
+        data: url.pathname,
       });
 
       // Set up the timeout
@@ -98,18 +107,20 @@ export default class Peer {
 
   _onPeerRequest(e) {
     // caches.match() will look for a cache entry in all of the caches available to the service worker.
-    caches.match(e.data).then(response => {
-      if (response) {
-        // signaling server needs us to seed
-        // we will connected to a given room
-        const room = this.peerData.connect(e.room.id);
-        room.on("participant", promise => promise.then(peer => {
-          //this peer disconnected from room
-          peer.on("disconnected", () => room.disconnect());
-          // send the response
-          peer.send(response);
-        }));
-      }
+    caches.open(this.cacheName).then(function (cache) {
+      cache.match(e.data).then(response => {
+        if (response) {
+          // signaling server needs us to seed
+          // we will connected to a given room
+          const room = this.peerData.connect(e.room.id);
+          room.on("participant", promise => promise.then(peer => {
+            //this peer disconnected from room
+            peer.on("disconnected", () => room.disconnect());
+            // send the response
+            peer.send(response);
+          }));
+        }
+      });
     });
   }
 }

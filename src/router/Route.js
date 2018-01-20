@@ -8,7 +8,7 @@ export default class Route {
     this.addMiddleware = this.addMiddleware.bind(this);
   }
 
-  addMiddleware(...middleware) {
-    this.middleware.concat(middleware);
+  addMiddleware(middleware) {
+    this.middleware = this.middleware.concat(middleware);
   }
 }

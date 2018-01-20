@@ -10,6 +10,8 @@ export default class Node {
     this.isLeaf = this.isLeaf.bind(this);
     this.addChild = this.addChild.bind(this);
     this.getChild = this.getChild.bind(this);
+    this.getMiddleware = this.getMiddleware.bind(this);
+    this._isMatch = this._isMatch.bind(this);
   }
 
   isRoot() {
@@ -26,13 +28,16 @@ export default class Node {
     }
 
     const parts = path.split("/");
-    for (let child in this.children) {
+    for (const i in this.children) {
+      const child = this.children[i];
       if (child._isMatch(parts[0])) {
         return child.addChild(parts.slice(1).join("/"));
       }
     }
 
     const node = new Node(parts[0], this);
+    this.children.push(node);
+
     return node.addChild(parts.slice(1).join("/"));
   }
 
@@ -42,7 +47,9 @@ export default class Node {
     }
 
     const parts = path.split("/");
-    for (let child in this.children) {
+
+    for (const i in this.children) {
+      const child = this.children[i];
       if (child._isMatch(parts[0])) {
         return child.getChild(parts.slice(1).join("/"));
       }

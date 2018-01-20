@@ -1,6 +1,6 @@
 import { getInstall, getActivate, getFetch } from "./listeners";
 import Router from "./router";
-import * as methods from "methods";
+import methods from "methods";
 
 export default class PeerCDN {
   // If at any point you want to force pages that use this service worker to start using a fresh
