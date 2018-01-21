@@ -16,7 +16,7 @@ app.use("/css", express.static(fspath.join(__dirname, "css")));
 app.use("/fonts", express.static(fspath.join(__dirname, "fonts")));
 app.use("/images", express.static(fspath.join(__dirname, "images")));
 app.use("/js", express.static(fspath.join(__dirname, "js")));
-app.use("/vendor", express.static(fspath.join(__dirname, "./../dist")));
+app.use("/vendor", express.static(fspath.join(__dirname, "./node_modules/peer-cdn/dist")));
 app.use(cookieParser());
 app.get("/favicon.ico", (req, res) => res.sendStatus(404));
 app.get("*", (req, res) => res.sendFile(index));

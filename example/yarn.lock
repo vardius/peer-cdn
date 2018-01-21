@@ -339,6 +339,12 @@ path-to-regexp@0.1.7:
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-0.1.7.tgz#df604178005f522f15eb4490e7247a1bfaa67f8c"
 
+peer-cdn@^0.1.0-alpha:
+  version "0.1.0-alpha"
+  resolved "https://registry.yarnpkg.com/peer-cdn/-/peer-cdn-0.1.0-alpha.tgz#e6d89ffc3adc3512779c5e5187d89583792a073f"
+  dependencies:
+    webrtc-adapter "^6.1.0"
+
 peer-data-server@^1.0.9:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/peer-data-server/-/peer-data-server-1.0.9.tgz#0d3e5aa851b46a6c9242972315094ced835132d5"
@@ -505,6 +511,13 @@ vary@~1.1.2:
 webrtc-adapter@^6.0.1:
   version "6.0.3"
   resolved "https://registry.yarnpkg.com/webrtc-adapter/-/webrtc-adapter-6.0.3.tgz#850ab1649099922086c2c038c87c10c46d0c42cc"
+  dependencies:
+    rtcpeerconnection-shim "^1.1.13"
+    sdp "^2.3.0"
+
+webrtc-adapter@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/webrtc-adapter/-/webrtc-adapter-6.1.0.tgz#238ad8c510558798d4dd8978aaf80e2675bbc1ea"
   dependencies:
     rtcpeerconnection-shim "^1.1.13"
     sdp "^2.3.0"
