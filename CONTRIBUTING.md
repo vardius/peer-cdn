@@ -14,7 +14,7 @@ Any pull requests that involve breaking changes should be made against the `next
 
 ### Getting Help
 
-**For support or usage questions like “how do I do X with **peer-cdn**” and “my code doesn't work”, we encourage you to post an issue.
+For support or usage questions like “how do I do X with **peer-cdn**” and “my code doesn't work”, we encourage you to post an issue.
 
 Please be considerate when doing this as this is not the primary purpose of the issue tracker.
 
