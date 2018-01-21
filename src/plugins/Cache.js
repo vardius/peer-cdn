@@ -18,7 +18,7 @@ export default class Cache {
           return null;
         }
 
-        return caches.open(this.caches.peerfetch).then(function (cache) {
+        return caches.open(this.names.peerfetch).then(function (cache) {
           const url = new URL(request.url);
           return cache.match(url.pathname).then(response => {
             if (response) {

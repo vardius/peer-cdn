@@ -7,7 +7,7 @@
   const peerPlugin = new PeerPlugin({
     // we pass the cache name to peer plugin
     // otherwise it will not get a cached response
-    cacheName: cachePlugin.cacheName.peerfetch,
+    cacheName: cachePlugin.names.peerfetch,
     servers: {
       iceServers: [
         {

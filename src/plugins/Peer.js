@@ -107,7 +107,7 @@ export default class Peer {
 
   _onPeerRequest(e) {
     // caches.match() will look for a cache entry in all of the caches available to the service worker.
-    caches.open(this.cacheName).then(function (cache) {
+    caches.open(this.cacheName).then(cache => {
       cache.match(e.data).then(response => {
         if (response) {
           // signaling server needs us to seed
