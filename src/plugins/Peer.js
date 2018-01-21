@@ -70,9 +70,9 @@ export default class Peer {
       const roomId = '';
       const room = this.peerData.connect(roomId);
 
-      room.on("participant", promise => {
-        promise.then(peer => {
-          peer.on("message", payload => {
+      room.on("participant", function (participant) {
+        participant.then(peer => {
+          peer.on("message", function (payload) {
             if (!payload) {
               return;
             }
@@ -84,7 +84,7 @@ export default class Peer {
           });
 
           // renegotiate if there was an error
-          peer.on("error", () => peer.renegotiate());
+          peer.on("error", function () { peer.renegotiate(); });
         });
       });
 
@@ -98,7 +98,7 @@ export default class Peer {
       });
 
       // Set up the timeout
-      setTimeout(function () {
+      setTimeout(() => {
         room.disconnect();
         reject('Promise timed out after ' + this.timeoutAfter + ' ms');
       }, this.timeoutAfter);
@@ -113,9 +113,9 @@ export default class Peer {
           // signaling server needs us to seed
           // we will connected to a given room
           const room = this.peerData.connect(e.room.id);
-          room.on("participant", promise => promise.then(peer => {
+          room.on("participant", participant => participant.then(function (peer) {
             //this peer disconnected from room
-            peer.on("disconnected", () => room.disconnect());
+            peer.on("disconnected", function () { room.disconnect() });
             // send the response
             peer.send(response);
           }));
