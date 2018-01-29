@@ -5,15 +5,15 @@ describe("Router", () => {
   it("should call global handler", () => {
     let calledPut = false;
     const requestMock = {};
-    const mockPlugin = {
+    const mockPluginFactory = () => ({
       get: () => 'world',
       put: () => calledPut = true,
-    }
+    })
 
     const router = new Router();
     const middleware = new Middleware();
 
-    router.use('GET', '/', middleware.applyFastest, mockPlugin);
+    router.use('GET', '/', middleware.applyFastest, mockPluginFactory);
 
     const handler = router.getHandler('GET', '/x');
 
@@ -32,15 +32,15 @@ describe("Router", () => {
   it("should call handler", () => {
     let calledPut = false;
     const requestMock = {};
-    const mockPlugin = {
+    const mockPluginFactory = () => ({
       get: () => 'world',
       put: () => calledPut = true,
-    }
+    })
 
     const router = new Router();
     const middleware = new Middleware();
 
-    router.use('GET', '/x', middleware.applyFastest, mockPlugin);
+    router.use('GET', '/x', middleware.applyFastest, mockPluginFactory);
 
     const handler = router.getHandler('GET', '/x');
 
@@ -57,15 +57,15 @@ describe("Router", () => {
   });
 
   it("should not call global handler", () => {
-    const mockPlugin = {
+    const mockPluginFactory = () => ({
       get: () => 'world',
       put: () => null,
-    }
+    })
 
     const router = new Router();
     const middleware = new Middleware();
 
-    router.use('GET', '/x', middleware.applyFastest, mockPlugin);
+    router.use('GET', '/x', middleware.applyFastest, mockPluginFactory);
 
     const handler = router.getHandler('GET', '/y');
     expect(handler).toEqual(null);
