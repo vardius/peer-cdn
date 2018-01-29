@@ -16,6 +16,9 @@ var config = {
       jsnext: true,
       browser: true
     }),
+    babel({
+      exclude: 'node_modules/**'
+    }),
     commonjs({
       namedExports: {
         'node_modules/peer-data/dist/bundle.js': [
@@ -24,9 +27,6 @@ var config = {
           'EventDispatcher',
         ],
       }
-    }),
-    babel({
-      exclude: 'node_modules/**'
     }),
     replace({
       'process.env.NODE_ENV': JSON.stringify(env)
