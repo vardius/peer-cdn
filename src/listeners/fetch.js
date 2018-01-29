@@ -1,11 +1,11 @@
 export default function getFetch(router) {
   return event => {
     try {
-      const request = event.request;
+      const request = event.request.clone();
       const url = new URL(request.url);
       const handler = router.getHandler(request.method, url.pathname);
       if (handler) {
-        event.respondWith(handler(request));
+        event.respondWith(handler(event));
       }
 
       // find out if other request are being handlet by noetwork not sw

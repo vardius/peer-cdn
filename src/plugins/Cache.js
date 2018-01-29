@@ -1,15 +1,23 @@
 export default class Cache {
+  static peerfetch = "peerfetch-cache-v";
+
   constructor(options) {
-    const version = options.version || "";
     // Overkill for this single cache example but this is a best practise
-    this.names = { peerfetch: "peerfetch-cache-v" + version };
+    this.names = { peerfetch: Cache.peerfetch };
+
+    if (options) {
+      const { version, names } = options;
+      this.names = { peerfetch: Cache.peerfetch + version || "", ...(names || {}) };
+    }
 
     this.getMiddleware = this.getMiddleware.bind(this);
     this.clearOldCaches = this.clearOldCaches.bind(this);
   }
 
   // Middleware factory function for fetch event
-  getMiddleware(request) {
+  getMiddleware(event) {
+    const request = event.request.clone();
+
     return {
       get: () => {
         // do not cache ranged responses
@@ -18,15 +26,14 @@ export default class Cache {
           return null;
         }
 
-        return caches.open(this.names.peerfetch).then(function (cache) {
-          const url = new URL(request.url);
-          return cache.match(url.pathname).then(function (response) {
-            if (response) {
-              return response;
-            }
+        // caches.match() will look for a cache entry in all of the caches available to the service worker.
+        // It's an alternative to first opening a specific named cache and then matching on that.
+        caches.match(request).then(function (response) {
+          if (response) {
+            return response;
+          }
 
-            return null;
-          });
+          return null;
         });
       },
       put: response => {
@@ -43,8 +50,7 @@ export default class Cache {
         const responseToCache = response.clone();
 
         caches.open(this.names.peerfetch).then(function (cache) {
-          const cacheRequest = request.clone();
-          cache.put(cacheRequest, responseToCache);
+          cache.put(request, responseToCache);
         });
       }
     };

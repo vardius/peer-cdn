@@ -4,9 +4,11 @@ export default class Network {
   }
 
   // Middleware factory function for fetch event
-  getMiddleware(request) {
+  getMiddleware(event) {
+    const request = event.request.clone();
+
     return {
-      get: async function () { await fetch(request); }
+      get: async function () { return await fetch(request); }
     };
   }
 }
