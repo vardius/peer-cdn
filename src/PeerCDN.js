@@ -1,6 +1,5 @@
 import { getInstall, getActivate, getFetch } from "./listeners";
 import Router from "./router";
-import methods from "methods";
 
 export default class PeerCDN {
   // If at any point you want to force pages that use this service worker to start using a fresh
@@ -10,19 +9,12 @@ export default class PeerCDN {
   constructor() {
     this.router = new Router();
     this.register = this.register.bind(this);
-    this.all = this.all.bind(this);
-
-    // Will generate functions per HTTP method
-    methods.forEach(method => {
-      PeerCDN.prototype[method] = (path, strategy, ...middleware) => {
-        this.router.use(method, path, strategy, ...middleware);
-      };
-    });
+    this.GET = this.GET.bind(this);
   }
 
   // Register middlewares for a all methods and given route path with one of stategies
-  all(path, strategy, ...middleware) {
-    methods.forEach(method => this.router.use(method, path, strategy, ...middleware));
+  GET(path, strategy, ...middleware) {
+    this.router.use('GET', path, strategy, ...middleware)
   }
 
   // Register handlers for given service worker instance
