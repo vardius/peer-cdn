@@ -29,11 +29,13 @@ export default class Delegate {
         // Eg, if it's cross-origin.
         if (!event.clientId) return null;
 
-        const client = new MessageClient(event.clientId, this.timeoutAfter);
+        // eslint-disable-next-line
+        const client = await clients.get(event.clientId);
+        const msgClient = new MessageClient(this.timeoutAfter);
         try {
           // we can not send request to a client so we do have to mock it
           // the way it is enought for peer plugin
-          const response = await client.sendMessage({ url: request.url });
+          const response = await msgClient.sendMessageToClient(client, { url: request.url });
           if (response) {
             return response;
           }

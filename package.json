@@ -1,6 +1,6 @@
 {
   "name": "peer-cdn",
-  "version": "0.1.0-alpha",
+  "version": "1.0.0-beta",
   "description": "Lightweight library providing peer to peer CDN functionality",
   "browser": "lib/index.js",
   "main": "lib/index.js",
@@ -19,8 +19,6 @@
     "test:watch": "yarn test --watch",
     "test:cov": "yarn test --coverage",
     "build": "cross-env NODE_ENV=production rollup -c",
-    "builddev": "cross-env NODE_ENV=development rollup -c",
-    "prebuilddev": "yarn run clean",
     "prepare": "yarn run build",
     "prebuild": "yarn run clean",
     "preversion": "yarn test",

@@ -1,6 +1,8 @@
 (function () {
   "use strict";
 
+  // import peer-cdn into service worker
+  // this path is exposed with server
   self.importScripts("/peer-cdn/index.js");
 
   const cachePlugin = new CachePlugin({ version: 1 });

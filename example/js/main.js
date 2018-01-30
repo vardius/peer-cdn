@@ -20,8 +20,8 @@ if ("serviceWorker" in navigator) {
   });
 
   // Set up a listener for messages posted from the service worker.
-  // The service worker is set to post a message to all its clients once it's run its activation
-  // handler and taken control of the page, so you should see this message event fire once.
+  // The service worker is set to post a message to specific client only
+  // so you should see this message event fire once.
   // You can force it to fire again by visiting this page in an Incognito window.
   navigator.serviceWorker.addEventListener('message', function (event) {
     const request = new Request(event.data.url);

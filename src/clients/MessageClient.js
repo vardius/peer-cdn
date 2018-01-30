@@ -1,23 +1,18 @@
 export default class MessageClient {
-  constructor(id, timeoutAfter = 1500) {
-    this.id = id;
+  constructor(timeoutAfter = 1500) {
     this.timeoutAfter = timeoutAfter;
 
-    this.sendMessage = this.sendMessage.bind(this);
+    this.sendMessageToClient = this.sendMessageToClient.bind(this);
+    this.sendMessageToAllClients = this.sendMessageToAllClients.bind(this);
   }
 
-  async sendMessage(message) {
-    // Get the client.
-    // eslint-disable-next-line
-    const client = await clients.get(this.id);
+  async sendMessageToClient(client, message) {
     // Exit early if we don't get the client.
     // Eg, if it closed.
     if (!client) return null;
 
     // This wraps the message posting/response in a promise, which will resolve if the response doesn't
-    // contain an error, and reject with the error if it does. If you'd prefer, it's possible to call
-    // controller.postMessage() and set up the onmessage handler independently of a promise, but this is
-    // a convenient wrapper.
+    // contain an error, and reject with the error if it does.
     return await new Promise((resolve, reject) => {
       const messageChannel = new MessageChannel();
       messageChannel.port1.onmessage = function (event) {
@@ -43,5 +38,12 @@ export default class MessageClient {
 
       }, this.timeoutAfter);
     });
+  }
+
+  async sendMessageToAllClients(message) {
+    // eslint-disable-next-line
+    const cs = clients.matchAll();
+
+    return Promise.all(cs.forEach(client => this.sendMessageToclient(client, message)))
   }
 }
