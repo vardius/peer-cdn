@@ -36,7 +36,7 @@ git clone https://github.com/your-username/peer-cdn.git
 
 ### Building
 
-#### Building Redux
+#### Building
 
 Running the `build` task will create all a CommonJS module-per-module build, a UMD build and ES6 build.
 ```
