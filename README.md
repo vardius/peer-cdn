@@ -26,6 +26,8 @@ Lightweight library providing peer to peer CDN functionality
 
 # **This is work in progress!**
 
+You can speed up the process of development. Check [help wanted](https://github.com/vardius/peer-cdn/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) issues and [contribute](https://github.com/vardius/peer-cdn/blob/master/CONTRIBUTING.md#development)
+
 ## Contribution
 
 Is *peer-cdn* library missing something ?
