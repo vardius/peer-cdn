@@ -48,7 +48,7 @@ export default class Middleware {
     return funcs.reduce((a, b) => async request => {
       const x = await a(request);
       let response = await x.get();
-      if (response !== null) {
+      if (response) {
         // pass response to put method
         x.put && x.put(response);
 

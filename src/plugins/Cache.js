@@ -19,22 +19,25 @@ export default class Cache {
     const request = event.request.clone();
 
     return {
-      get: () => {
+      get: async () => {
         // do not cache ranged responses
         // https://github.com/vardius/peer-cdn/issues/7
         if (request.headers.has("range")) {
           return null;
         }
 
-        // caches.match() will look for a cache entry in all of the caches available to the service worker.
-        // It's an alternative to first opening a specific named cache and then matching on that.
-        caches.match(request).then(function (response) {
+        try {
+          // caches.match() will look for a cache entry in all of the caches available to the service worker.
+          // It's an alternative to first opening a specific named cache and then matching on that.
+          const response = await caches.match(request);
           if (response) {
             return response;
           }
 
           return null;
-        });
+        } catch (e) {
+          return null;
+        }
       },
       put: response => {
         // do not cache ranged responses

@@ -41,9 +41,7 @@ export default class PeerClient {
 
       room.on("participant", function (participant) {
         participant.then(peer => {
-          console.log('participant', peer);
           peer.on("message", function (message) {
-            console.log('message', message);
             if (!message) {
               return;
             }
@@ -60,7 +58,6 @@ export default class PeerClient {
       });
 
       const url = new URL(request.url);
-      console.log('Ask for:', url.pathname, request);
       EventDispatcher.getInstance().dispatch("send", {
         type: PeerEventType.PEER,
         caller: null,
@@ -79,13 +76,10 @@ export default class PeerClient {
   }
 
   sendToRoom(roomId, response) {
-    console.log('Connect to:', roomId);
     // signaling server needs us to seed
     // we will connected to a given room
     const room = this.peerData.connect(roomId);
     room.on("participant", participant => participant.then(function (peer) {
-      console.log('participant', peer);
-      console.log('response', response);
       //this peer disconnected from room
       peer.on("disconnected", function () { room.disconnect() });
       // send the response

@@ -24,7 +24,6 @@ if ("serviceWorker" in navigator) {
   // handler and taken control of the page, so you should see this message event fire once.
   // You can force it to fire again by visiting this page in an Incognito window.
   navigator.serviceWorker.addEventListener('message', function (event) {
-    console.log('onMessage', event.data);
     const request = new Request(event.data.url);
     // mock sw event wrapping request with object
     const middleware = peerPlugin.getMiddleware({ request });
@@ -44,10 +43,7 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js")
     .then(function (registration) {
       // Registration was successful
-      console.log(
-        "ServiceWorker registration successful with scope: ",
-        registration.scope
-      );
+      console.log("ServiceWorker registration successful with scope: ", registration.scope);
     })
     .catch(function (error) {
       console.error("Service Worker Error", error);

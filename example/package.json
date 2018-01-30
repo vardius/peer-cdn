@@ -17,10 +17,7 @@
   "dependencies": {
     "cookie-parser": "1.4.3",
     "express": "^4.15.3",
-    "peer-cdn": "^0.1.0-alpha",
-    "peer-data": "^3.0.23",
-    "peer-data-server": "^1.0.9",
-    "socket.io": "^2.0.2"
+    "peer-cdn": "^0.1.0-alpha"
   },
   "devDependencies": {}
 }

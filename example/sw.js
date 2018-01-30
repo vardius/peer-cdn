@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  self.importScripts("/vendor/peer-cdn.js");
+  self.importScripts("/peer-cdn/index.js");
 
   const cachePlugin = new CachePlugin({ version: 1 });
   // since sw does not support webrtc yet we use PeerPlugin on client side 
@@ -11,9 +11,7 @@
 
   function run() {
     const cdn = new PeerCDN();
-    cdn.GET("/", STRATEGIES.ordered,
-      // cdn.GET("/js/main.js", STRATEGIES.ordered,
-      // all of the following plugins are required
+    cdn.GET("/css/main.css", STRATEGIES.ordered,
       cachePlugin.getMiddleware,
       delegatePlugin.getMiddleware,
       networkPlugin.getMiddleware

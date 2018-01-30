@@ -2,28 +2,25 @@
   "name": "peer-cdn",
   "version": "0.1.0-alpha",
   "description": "Lightweight library providing peer to peer CDN functionality",
-  "browser": "dist/peer-cdn.min.js",
+  "browser": "lib/index.js",
   "main": "lib/index.js",
   "module": "es/index.js",
   "jsnext:main": "es/index.js",
   "files": [
-    "dist",
     "lib",
     "es",
     "src"
   ],
   "scripts": {
-    "clean": "rimraf lib dist es coverage",
+    "clean": "rimraf lib es coverage",
     "lint": "eslint src test build",
     "test": "cross-env BABEL_ENV=test jest --no-cache --config jest-config.js",
     "posttest": "yarn run lint",
     "test:watch": "yarn test --watch",
     "test:cov": "yarn test --coverage",
-    "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --out-dir lib",
-    "build:es": "cross-env BABEL_ENV=es babel src --out-dir es",
-    "build:umd": "cross-env BABEL_ENV=es NODE_ENV=development rollup -c -i src/index.js -o dist/peer-cdn.js",
-    "build:umd:min": "cross-env BABEL_ENV=es NODE_ENV=production rollup -c -i src/index.js -o dist/peer-cdn.min.js",
-    "build": "yarn run build:commonjs & yarn run build:es & yarn run build:umd & yarn run build:umd:min",
+    "build": "cross-env NODE_ENV=production rollup -c",
+    "builddev": "cross-env NODE_ENV=development rollup -c",
+    "prebuilddev": "yarn run clean",
     "prepare": "yarn run build",
     "prebuild": "yarn run clean",
     "preversion": "yarn test",
@@ -71,7 +68,9 @@
   "jest": {
     "testRegex": "(/test/.*\\.spec.js)$"
   },
-  "dependencies": {},
+  "dependencies": {
+    "socket.io": "^2.0.4"
+  },
   "devDependencies": {
     "babel-cli": "^6.3.15",
     "babel-core": "^6.26.0",
@@ -106,6 +105,7 @@
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-replace": "^2.0.0",
     "rollup-plugin-uglify": "^2.0.1",
+    "uglify-es": "^3.3.9",
     "webrtc-adapter": "^6.1.0"
   }
 }

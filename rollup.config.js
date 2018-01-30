@@ -5,48 +5,66 @@ import replace from 'rollup-plugin-replace';
 import uglify from "rollup-plugin-uglify";
 import gzip from "rollup-plugin-gzip";
 import filesize from 'rollup-plugin-filesize';
+import pkg from './package.json';
+import { minify } from 'uglify-es';
 
-var env = process.env.NODE_ENV;
-var config = {
-  output: { format: 'umd' },
-  name: 'peer-cdn',
-  exports: 'named',
-  plugins: [
-    resolve({
-      jsnext: true,
-      browser: true
-    }),
-    babel({
-      exclude: 'node_modules/**'
-    }),
-    commonjs({
-      namedExports: {
-        'node_modules/peer-data/dist/bundle.js': [
-          'SocketChannel',
-          'AppEventType',
-          'EventDispatcher',
-        ],
-      }
-    }),
-    replace({
-      'process.env.NODE_ENV': JSON.stringify(env)
-    })
-  ]
-};
+const env = process.env.NODE_ENV;
+const isProd = env === 'production';
 
-if (env === 'production') {
-  config.plugins.push(
-    uglify({
-      compress: {
-        pure_getters: true,
-        unsafe: true,
-        unsafe_comps: true,
-        warnings: false
-      }
-    }),
+const plugins = [
+  replace({
+    'process.env.NODE_ENV': JSON.stringify(env)
+  }),
+  resolve({
+    jsnext: true,
+    browser: true,
+    preferBuiltins: true,
+  }),
+  babel({
+    exclude: 'node_modules/**',
+  }),
+  commonjs({
+    namedExports: {
+      'node_modules/peer-data/dist/bundle.js': [
+        'SocketChannel',
+        'AppEventType',
+        'EventDispatcher',
+      ],
+    }
+  }),
+];
+
+if (isProd) {
+  plugins.push(
+    // Since we're using ES modules we need this _hack_
+    // https://github.com/TrySound/rollup-plugin-uglify#warning
+    uglify({}, minify),
     gzip(),
     filesize(),
   );
 }
+
+let config = {
+  name: 'peer-cdn',
+  banner: `/* peer-cdn version ${pkg.version} */`,
+  footer: '/* Join our community! http://rafallorenz.com/peer-cdn */',
+  input: 'src/index.js',
+  extend: true,
+  output: [
+    {
+      file: pkg.main,
+      format: 'umd',
+      exports: 'named',
+      sourcemap: !isProd
+    },
+    {
+      file: pkg.module,
+      format: 'es',
+      exports: 'named',
+      sourcemap: !isProd
+    },
+  ],
+  plugins,
+};
 
 export default config;

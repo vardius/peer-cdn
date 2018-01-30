@@ -3,7 +3,8 @@ const fspath = require("path");
 const cookieParser = require("cookie-parser");
 const http = require("http");
 const fs = require("fs");
-const PeerDataServer = require("peer-data-server");
+// const PeerCdnServer = require("peer-cdn/server");
+const PeerCdnServer = require("../src/server");
 
 const PeerEventType = { PEER: "PEER" };
 const port = process.env.PORT || 3000;
@@ -16,8 +17,8 @@ app.use("/css", express.static(fspath.join(__dirname, "css")));
 app.use("/fonts", express.static(fspath.join(__dirname, "fonts")));
 app.use("/images", express.static(fspath.join(__dirname, "images")));
 app.use("/js", express.static(fspath.join(__dirname, "js")));
-// app.use("/vendor", express.static(fspath.join(__dirname, "./node_modules/peer-cdn/dist")));
-app.use("/vendor", express.static(fspath.join(__dirname, "../dist")));
+// app.use("/vendor", express.static(fspath.join(__dirname, "./node_modules/peer-cdn/lib")));
+app.use("/peer-cdn", express.static(fspath.join(__dirname, "../lib")));
 app.use(cookieParser());
 app.get("/favicon.ico", (req, res) => res.sendStatus(404));
 app.get("*", (req, res) => res.sendFile(index));
@@ -69,17 +70,9 @@ app.get("/movie.mp4", (req, res) => {
 
 const server = http.createServer(app);
 
-const createPeerDataServer = PeerDataServer.default || PeerDataServer;
-createPeerDataServer(server, function (socket, event) {
-  switch (event.type) {
-    case PeerEventType.PEER:
-      // todo: we should pick best peer and ask only one socket to connect
-      socket.broadcast.emit("message", event);
-      break;
-    default:
-      socket.broadcast.to(event.room.id).emit("message", event);
-  }
-});
+// Setup peer-cdn signaling server
+const appendPeerCdnServer = PeerCdnServer.default || PeerCdnServer;
+appendPeerCdnServer(server);
 
 server.listen(port, () => {
   // eslint-disable-next-line no-console

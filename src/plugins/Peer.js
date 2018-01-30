@@ -39,7 +39,6 @@ export default class Peer {
 
           return null;
         } catch (e) {
-          console.log('PeerPlugin Error', e);
           return null;
         }
       }
@@ -47,11 +46,9 @@ export default class Peer {
   }
 
   _onPeerRequest(e) {
-    console.log('_onPeerRequest', e)
     // caches.match() will look for a cache entry in all of the caches available to the service worker.
     caches.open(this.cacheName).then(cache => {
       cache.match(e.data).then(response => {
-        console.log('cache.match', response);
         if (response) {
           this.client.sendToRoom(e.room.id, response);
         }

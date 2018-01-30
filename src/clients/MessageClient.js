@@ -19,7 +19,7 @@ export default class MessageClient {
     // controller.postMessage() and set up the onmessage handler independently of a promise, but this is
     // a convenient wrapper.
     return await new Promise((resolve, reject) => {
-      let messageChannel = new MessageChannel();
+      const messageChannel = new MessageChannel();
       messageChannel.port1.onmessage = function (event) {
         if (event.data && event.data.error) {
           reject(event.data.error);
