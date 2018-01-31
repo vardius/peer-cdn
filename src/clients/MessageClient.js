@@ -19,7 +19,7 @@ export default class MessageClient {
         if (event.data && event.data.error) {
           reject(event.data.error);
         } else {
-          resolve(event.data);
+          resolve(event.data || null);
         }
       };
 
