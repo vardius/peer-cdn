@@ -18,6 +18,10 @@
       delegatePlugin.getMiddleware,
       networkPlugin.getMiddleware
     );
+
+    // We need to register service worker events
+    // cdn.register() will add listeners for install, activate and fetch
+    // gaining required control
     cdn.register();
   }
 
