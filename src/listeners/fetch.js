@@ -8,8 +8,8 @@ export default function getFetch(router) {
         event.respondWith(handler(event));
       }
 
-      // find out if other request are being handlet by noetwork not sw
-      // return event.respondWith(fetch(request));
+      // find out if other request are being handlet by network not sw
+      return event.respondWith(fetch(request));
     } catch (error) {
       // This catch() will handle exceptions thrown from the fetch() operation.
       // Note that a HTTP error response (e.g. 404) will NOT trigger an exception.
