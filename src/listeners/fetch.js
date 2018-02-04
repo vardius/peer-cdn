@@ -5,11 +5,11 @@ export default function getFetch(router) {
       const url = new URL(request.url);
       const handler = router.getHandler(request.method, url.pathname);
       if (handler) {
-        event.respondWith(handler(event));
+        return event.respondWith(handler(event));
       }
 
-      // find out if other request are being handlet by network not sw
-      return event.respondWith(fetch(request));
+      // find out if other request are being handled by network not sw
+      return event.respondWith(fetch(event.request));
     } catch (error) {
       // This catch() will handle exceptions thrown from the fetch() operation.
       // Note that a HTTP error response (e.g. 404) will NOT trigger an exception.
