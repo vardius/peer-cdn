@@ -16,11 +16,10 @@ export default class MessageClient {
     return await new Promise((resolve, reject) => {
       const messageChannel = new MessageChannel();
       messageChannel.port1.onmessage = function (event) {
-        if (event.data && event.data.error) {
-          reject(event.data.error);
-        } else {
-          resolve(event.data || null);
-        }
+        resolve(event.data || null);
+      };
+      messageChannel.port1.onmessageerror = function (event) {
+        reject(event);
       };
 
       // This sends the message data as well as transferring messageChannel.port2 to the client.

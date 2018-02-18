@@ -58,14 +58,18 @@ if ("serviceWorker" in navigator) {
 
   window.addEventListener('message', function (event) { console.log('window.addEventListener', event.data) });
   window.onmessage = function (event) { console.log('window.onmessage', event.data) };
+  window.onmessageerror = function (event) { console.log('window.onmessageerror', event) };
   navigator.serviceWorker.addEventListener('message', function (event) { console.log('navigator.serviceWorker.addEventListener', event.data) });
   navigator.serviceWorker.onmessage = function (event) { console.log('navigator.serviceWorker.onmessage', event.data) };
+  navigator.serviceWorker.onmessageerror = function (event) { console.log('navigator.serviceWorker.onmessageerror', event) };
   // navigator.serviceWorker.controller.addEventListener('message', function (event) { console.log('navigator.serviceWorker.contoller.addEventListener', event.data) });
   // navigator.serviceWorker.controller.onmessage = function (event) { console.log('navigator.serviceWorker.contoller.onmessage', event.data) };
+  // navigator.serviceWorker.controller.onmessageerror = function (event) { console.log('navigator.serviceWorker.contoller.onmessageerror', event) };
   navigator.serviceWorker.ready.then(function (registration) {
     console.log('navigator.serviceWorker.ready');
     registration.active.addEventListener('message', function (event) { console.log('registration.active.addEventListener', event.data) });
     registration.active.onmessage = function (event) { console.log('registration.active.onmessage', event.data) };
+    registration.active.onmessageerror = function (event) { console.log('registration.active.onmessageerror', event) };
   });
 
   navigator.serviceWorker.register("sw.js")
