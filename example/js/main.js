@@ -24,7 +24,6 @@ if ("serviceWorker" in navigator) {
   // so you should see this message event fire once.
   // You can force it to fire again by visiting this page in an Incognito window.
   navigator.serviceWorker.addEventListener('message', function (event) {
-    console.log('onMessage', event.data);
     const request = new Request(event.data.url);
     // mock sw event wrapping request with object
     const middleware = peerPlugin.getMiddleware({ request });
