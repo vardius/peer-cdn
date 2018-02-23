@@ -28,7 +28,7 @@ Lightweight library providing peer to peer CDN functionality
 
 You can speed up the process of development. Check [help wanted](https://github.com/vardius/peer-cdn/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) issues and [contribute](https://github.com/vardius/peer-cdn/blob/master/CONTRIBUTING.md#development)
 
-### Things got consider:
+### Things to consider:
 - peer matching algorithms (ways of improving - pick best direction to go from here, beta version keeps it simple - pick first)
 - browser support [WebRTC](https://webrtc.org)
 - browser support [`client.postMessage()`](https://developer.mozilla.org/en-US/docs/Web/API/Client/postMessage#Browser_compatibility)
