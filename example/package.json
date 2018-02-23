@@ -17,7 +17,7 @@
   "dependencies": {
     "cookie-parser": "1.4.3",
     "express": "^4.15.3",
-    "peer-cdn": "^0.1.0-alpha"
+    "peer-cdn": "^1.0.1-beta"
   },
   "devDependencies": {}
 }
