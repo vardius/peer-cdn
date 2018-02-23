@@ -24,5 +24,5 @@ export {
   Cache as CachePlugin,
   Peer as PeerPlugin,
   Delegate as DelegatePlugin,
-  Network as NetworkPlugin
+  Network as NetworkPlugin,
 };
