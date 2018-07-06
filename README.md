@@ -38,6 +38,12 @@ For now I know there might be some issues with:
 - [`client.postMessage()`](https://developer.mozilla.org/en-US/docs/Web/API/Client/postMessage#Browser_compatibility) problems on **Google Chrome Version 64.0.3282.167 (Official Build) (64-bit)** however works on **Mozilla Firefox Quantum 58.0.2 (64-bit)**
 - [range requests](https://github.com/vardius/peer-cdn/issues/7)
 
+### Next steps:
+- [ ] add more tests
+- [ ] resolve browser support
+- [ ] create web pack plugin
+- [ ] improve signalling server
+
 ## Contribution
 
 Is *peer-cdn* library missing something ?
