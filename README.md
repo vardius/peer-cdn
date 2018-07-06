@@ -50,7 +50,7 @@ Is *peer-cdn* library missing something ?
 
 No problem! Simply [fork](https://github.com/vardius/peer-cdn/network#fork-destination-box) this repository and create pull request.
 
-## Instaliation
+## Installation
 
 ```bash
 npm install --save peer-cdn
