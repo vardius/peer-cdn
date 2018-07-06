@@ -34,7 +34,7 @@ export default class Delegate {
         const msgClient = new MessageClient(this.timeoutAfter);
         try {
           // we can not send request to a client so we do have to mock it
-          // the way it is enought for peer plugin
+          // the way it is enough for peer plugin
           const response = await msgClient.sendMessageToClient(client, { url: request.url });
           if (response) {
             return response;

@@ -2,7 +2,7 @@ export default class Cache {
   static peerfetch = "peerfetch-cache-v";
 
   constructor(options) {
-    // Overkill for this single cache example but this is a best practise
+    // Overkill for this single cache example but this is a best practice
     this.names = { peerfetch: Cache.peerfetch };
 
     if (options) {

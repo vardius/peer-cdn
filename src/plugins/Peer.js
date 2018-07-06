@@ -9,7 +9,7 @@ export default class Peer {
 
     const { cacheName, servers, constraints, socket, timeoutAfter } = options;
 
-    // cahce name to get the response from
+    // cache name to get the response from
     this.cacheName = cacheName;
     this.client = new PeerClient(servers, constraints, socket, timeoutAfter);
 
