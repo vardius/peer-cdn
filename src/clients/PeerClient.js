@@ -20,14 +20,19 @@ const defaults = {
 export const PeerEventType = { PEER: "PEER" };
 
 export default class PeerClient {
-  constructor(servers = defaults.servers, constraints = defaults.constraints, socket = defaults.socket, timeoutAfter = 1500) {
+  constructor(
+    servers = defaults.servers,
+    constraints = defaults.constraints,
+    socket = defaults.socket,
+    timeoutAfter = 1500
+  ) {
     // Timeout after 1500 ms by default
     this.timeoutAfter = timeoutAfter;
     this.match = this.match.bind(this);
     this.sendToRoom = this.sendToRoom.bind(this);
     this.createRoomId = this.createRoomId.bind(this);
 
-    // setup peer client 
+    // setup peer client
     this.peerData = new PeerData(servers, constraints);
     // setup signaling channel
     this.signaling = new SocketChannel(socket);
@@ -36,24 +41,23 @@ export default class PeerClient {
   match(request) {
     return new Promise((resolve, reject) => {
       const roomId = this.createRoomId();
-
       const room = this.peerData.connect(roomId);
 
-      room.on("participant", function (participant) {
-        participant.then(peer => {
-          peer.on("message", function (message) {
-            if (!message) {
-              return;
-            }
+      room.on("participant", function(peer) {
+        peer.on("message", function(message) {
+          if (!message) {
+            return;
+          }
 
-            // todo: handle chunk request
-            // https://github.com/vardius/peer-cdn/issues/7
-            room.disconnect();
-            resolve(message);
-          });
+          // todo: handle chunk request
+          // https://github.com/vardius/peer-cdn/issues/7
+          room.disconnect();
+          resolve(message);
+        });
 
-          // renegotiate if there was an error
-          peer.on("error", function () { peer.renegotiate(); });
+        // renegotiate if there was an error
+        peer.on("error", function() {
+          peer.renegotiate();
         });
       });
 
@@ -63,14 +67,13 @@ export default class PeerClient {
         caller: null,
         callee: null,
         room: { id: roomId },
-        data: url.pathname,
+        data: url.pathname
       });
 
       // Set up the timeout
       setTimeout(() => {
         room.disconnect();
-        reject('Promise timed out after ' + this.timeoutAfter + ' ms');
-
+        reject("Promise timed out after " + this.timeoutAfter + " ms");
       }, this.timeoutAfter);
     });
   }
@@ -79,20 +82,26 @@ export default class PeerClient {
     // signaling server needs us to seed
     // we will connected to a given room
     const room = this.peerData.connect(roomId);
-    room.on("participant", participant => participant.then(function (peer) {
-      //this peer disconnected from room
-      peer.on("disconnected", function () { room.disconnect() });
-      // send the response
-      peer.send(response);
-    }));
+    room.on("participant", participant =>
+      participant.then(function(peer) {
+        //this peer disconnected from room
+        peer.on("disconnected", function() {
+          room.disconnect();
+        });
+        // send the response
+        peer.send(response);
+      })
+    );
   }
 
   createRoomId() {
     let dt = new Date().getTime();
-    let uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    let uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(
+      c
+    ) {
       let r = (dt + Math.random() * 16) % 16 | 0;
       dt = Math.floor(dt / 16);
-      return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+      return (c == "x" ? r : (r & 0x3) | 0x8).toString(16);
     });
 
     return uuid;

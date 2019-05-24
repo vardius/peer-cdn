@@ -1,6 +1,3 @@
-import "babel-polyfill/dist/polyfill";
-import "webrtc-adapter";
-
 import PeerCDN from "./PeerCDN";
 import Middleware from "./router/Middleware";
 import { Cache, Peer, Network, Delegate } from "./plugins";
