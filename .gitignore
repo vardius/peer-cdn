@@ -1,8 +1,9 @@
+typings
+.code
 .DS_Store
 *.log
 node_modules
-lib
-es
+dist
 coverage
 .idea
 npm-debug.log
