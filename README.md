@@ -4,7 +4,6 @@
 [![codecov](https://codecov.io/gh/vardius/peer-cdn/branch/master/graph/badge.svg)](https://codecov.io/gh/vardius/peer-cdn)
 [![npm version](https://img.shields.io/npm/v/peer-cdn.svg)](https://www.npmjs.com/package/peer-cdn)
 [![license](https://img.shields.io/github/license/vardius/peer-cdn.svg)](LICENSE.md)
-[![Beerpay](https://beerpay.io/vardius/peer-cdn/badge.svg?style=beer-square)](https://beerpay.io/vardius/peer-cdn) [![Beerpay](https://beerpay.io/vardius/peer-cdn/make-wish.svg?style=flat-square)](https://beerpay.io/vardius/peer-cdn?focus=wish)
 
 Lightweight library providing peer to peer CDN functionality
 
