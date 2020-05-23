@@ -61,7 +61,7 @@
     ]
   },
   "dependencies": {
-    "peer-data": "^3.1.2",
+    "peer-data": "^3.2.1",
     "socket.io": "^2.0.4"
   },
   "devDependencies": {

@@ -1,23 +1,25 @@
 import PeerData, { SocketChannel, EventDispatcher } from "peer-data";
 
+const dispatcher = new EventDispatcher();
 const defaults = {
   servers: {
     iceServers: [
       {
         // url: "stun:stun.1.google.com:19302"
-        url: "stun:74.125.142.127:19302"
-      }
-    ]
+        url: "stun:74.125.142.127:19302",
+      },
+    ],
   },
   constraints: {
-    ordered: true
+    ordered: true,
   },
   socket: {
-    jsonp: false
-  }
+    jsonp: false,
+  },
 };
 
 export const PeerEventType = { PEER: "PEER" };
+export const EventDispatcher = dispatcher;
 
 export default class PeerClient {
   constructor(
@@ -33,9 +35,9 @@ export default class PeerClient {
     this.createRoomId = this.createRoomId.bind(this);
 
     // setup peer client
-    this.peerData = new PeerData(servers, constraints);
+    this.peerData = new PeerData(dispatcher, servers, constraints);
     // setup signaling channel
-    this.signaling = new SocketChannel(socket);
+    this.signaling = new SocketChannel(dispatcher, socket);
   }
 
   match(request) {
@@ -43,8 +45,8 @@ export default class PeerClient {
       const roomId = this.createRoomId();
       const room = this.peerData.connect(roomId);
 
-      room.on("participant", function(peer) {
-        peer.on("message", function(message) {
+      room.on("participant", function (peer) {
+        peer.on("message", function (message) {
           if (!message) {
             return;
           }
@@ -56,18 +58,18 @@ export default class PeerClient {
         });
 
         // renegotiate if there was an error
-        peer.on("error", function() {
+        peer.on("error", function () {
           peer.renegotiate();
         });
       });
 
       const url = new URL(request.url);
-      EventDispatcher.getInstance().dispatch("send", {
+      dispatcher.dispatch("send", {
         type: PeerEventType.PEER,
         caller: null,
         callee: null,
         room: { id: roomId },
-        data: url.pathname
+        data: url.pathname,
       });
 
       // Set up the timeout
@@ -82,10 +84,10 @@ export default class PeerClient {
     // signaling server needs us to seed
     // we will connected to a given room
     const room = this.peerData.connect(roomId);
-    room.on("participant", participant =>
-      participant.then(function(peer) {
+    room.on("participant", (participant) =>
+      participant.then(function (peer) {
         //this peer disconnected from room
-        peer.on("disconnected", function() {
+        peer.on("disconnected", function () {
           room.disconnect();
         });
         // send the response
@@ -96,13 +98,14 @@ export default class PeerClient {
 
   createRoomId() {
     let dt = new Date().getTime();
-    let uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(
-      c
-    ) {
-      let r = (dt + Math.random() * 16) % 16 | 0;
-      dt = Math.floor(dt / 16);
-      return (c == "x" ? r : (r & 0x3) | 0x8).toString(16);
-    });
+    let uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+      /[xy]/g,
+      function (c) {
+        let r = (dt + Math.random() * 16) % 16 | 0;
+        dt = Math.floor(dt / 16);
+        return (c == "x" ? r : (r & 0x3) | 0x8).toString(16);
+      }
+    );
 
     return uuid;
   }

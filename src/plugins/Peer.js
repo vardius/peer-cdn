@@ -1,5 +1,5 @@
 import { EventDispatcher } from "peer-data";
-import PeerClient, { PeerEventType } from "../clients/PeerClient";
+import PeerClient, { EventDispatcher, PeerEventType } from "../clients/PeerClient";
 
 export default class Peer {
   constructor(options) {
@@ -15,7 +15,7 @@ export default class Peer {
 
     this.getMiddleware = this.getMiddleware.bind(this);
 
-    EventDispatcher.getInstance().register(PeerEventType.PEER, this._onPeerRequest.bind(this));
+    EventDispatcher.register(PeerEventType.PEER, this._onPeerRequest.bind(this));
   }
 
   // Middleware factory function for fetch event
