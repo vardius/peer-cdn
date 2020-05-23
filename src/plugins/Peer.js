@@ -1,4 +1,3 @@
-import { EventDispatcher } from "peer-data";
 import PeerClient, { EventDispatcher, PeerEventType } from "../clients/PeerClient";
 
 export default class Peer {
