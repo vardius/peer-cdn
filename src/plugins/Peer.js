@@ -1,9 +1,9 @@
-import PeerClient, { EventDispatcher, PeerEventType } from "../clients/PeerClient";
+import PeerClient, { Dispatcher, PeerEventType } from "../clients/PeerClient";
 
 export default class Peer {
   constructor(options) {
     if (!options) {
-      throw new Error('cacheName option is required');
+      throw new Error("cacheName option is required");
     }
 
     const { cacheName, servers, constraints, socket, timeoutAfter } = options;
@@ -14,7 +14,7 @@ export default class Peer {
 
     this.getMiddleware = this.getMiddleware.bind(this);
 
-    EventDispatcher.register(PeerEventType.PEER, this._onPeerRequest.bind(this));
+    Dispatcher.register(PeerEventType.PEER, this._onPeerRequest.bind(this));
   }
 
   // Middleware factory function for fetch event
@@ -40,14 +40,14 @@ export default class Peer {
         } catch (e) {
           return null;
         }
-      }
+      },
     };
   }
 
   _onPeerRequest(e) {
     // caches.match() will look for a cache entry in all of the caches available to the service worker.
-    caches.open(this.cacheName).then(cache => {
-      cache.match(e.data).then(response => {
+    caches.open(this.cacheName).then((cache) => {
+      cache.match(e.data).then((response) => {
         if (response) {
           this.client.sendToRoom(e.room.id, response);
         }

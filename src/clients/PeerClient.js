@@ -1,6 +1,5 @@
 import PeerData, { SocketChannel, EventDispatcher } from "peer-data";
 
-const dispatcher = new EventDispatcher();
 const defaults = {
   servers: {
     iceServers: [
@@ -19,7 +18,7 @@ const defaults = {
 };
 
 export const PeerEventType = { PEER: "PEER" };
-export const EventDispatcher = dispatcher;
+export const Dispatcher = new EventDispatcher();
 
 export default class PeerClient {
   constructor(
@@ -35,9 +34,9 @@ export default class PeerClient {
     this.createRoomId = this.createRoomId.bind(this);
 
     // setup peer client
-    this.peerData = new PeerData(dispatcher, servers, constraints);
+    this.peerData = new PeerData(Dispatcher, servers, constraints);
     // setup signaling channel
-    this.signaling = new SocketChannel(dispatcher, socket);
+    this.signaling = new SocketChannel(Dispatcher, socket);
   }
 
   match(request) {
@@ -64,7 +63,7 @@ export default class PeerClient {
       });
 
       const url = new URL(request.url);
-      dispatcher.dispatch("send", {
+      Dispatcher.dispatch("send", {
         type: PeerEventType.PEER,
         caller: null,
         callee: null,
