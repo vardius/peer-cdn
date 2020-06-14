@@ -9,18 +9,22 @@ Lightweight library providing peer to peer CDN functionality
 
 ### Bundle size
 ```bash
-┌────────────────────────────────────────────────────┐
-│                                                    │
-│   Destination: lib/index.js                        │
-│   Bundle size: 247.07 KB, Gzipped size: 72.45 KB   │
-│                                                    │
-└────────────────────────────────────────────────────┘
-┌────────────────────────────────────────────────────┐
-│                                                    │
-│   Destination: es/index.js                         │
-│   Bundle size: 256.63 KB, Gzipped size: 73.71 KB   │
-│                                                    │
-└────────────────────────────────────────────────────┘
+┌───────────────────────────────────┐
+│                                   │
+│   Destination: dist/index.es.js   │
+│   Bundle Size:  232.06 KB         │
+│   Minified Size:  103.46 KB       │
+│   Gzipped Size:  28.94 KB         │
+│                                   │
+└───────────────────────────────────┘
+┌────────────────────────────────┐
+│                                │
+│   Destination: dist/index.js   │
+│   Bundle Size:  247.91 KB      │
+│   Minified Size:  95.23 KB     │
+│   Gzipped Size:  27.78 KB      │
+│                                │
+└────────────────────────────────┘
 ```
 
 # **This is work in progress!**

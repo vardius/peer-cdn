@@ -5,7 +5,7 @@ import { Cache, Peer, Network, Delegate } from "./plugins";
 const middleware = new Middleware();
 const STRATEGIES = {
   fastest: middleware.applyFastest,
-  ordered: middleware.applyOrdered
+  ordered: middleware.applyOrdered,
 };
 
 self.PeerCDN = PeerCDN;

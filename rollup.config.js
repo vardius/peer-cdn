@@ -6,28 +6,23 @@ import gzip from "rollup-plugin-gzip";
 import filesize from "rollup-plugin-filesize";
 import pkg from "./package.json";
 
-const external = Object.keys(pkg.dependencies);
+const external = Object.keys(pkg.peerDependencies || {});
 const env = process.env.NODE_ENV;
 const isProd = env === "production";
 
 const plugins = [
   replace({
-    "process.env.NODE_ENV": JSON.stringify(env)
+    "process.env.NODE_ENV": JSON.stringify(env),
   }),
-  resolve(),
+  resolve({
+    browser: true,
+    preferBuiltins: true,
+  }),
   babel({
     exclude: "node_modules/**",
-    runtimeHelpers: true
+    runtimeHelpers: true,
   }),
-  commonjs({
-    namedExports: {
-      "node_modules/peer-data/dist/bundle.js": [
-        "SocketChannel",
-        "AppEventType",
-        "EventDispatcher"
-      ]
-    }
-  })
+  commonjs({}),
 ];
 
 if (isProd) {
@@ -39,30 +34,27 @@ if (isProd) {
   );
 }
 
-let config = {
-  name: "peer-cdn",
-  banner: `/* peer-cdn version ${pkg.version} */`,
-  footer: "/* Join our community! http://rafallorenz.com/peer-cdn */",
+const config = {
   input: "src/index.js",
   external: external,
-  extend: true,
+  plugins: plugins,
+  treeshake: true,
   output: [
     {
       name: pkg.name,
       exports: "named",
       file: pkg.module,
       format: "es",
-      sourcemap: !isProd
+      sourcemap: !isProd,
     },
     {
       name: pkg.name,
       exports: "named",
       file: pkg.main,
-      format: "cjs",
-      sourcemap: !isProd
-    }
+      format: "umd",
+      sourcemap: !isProd,
+    },
   ],
-  plugins
 };
 
 export default config;

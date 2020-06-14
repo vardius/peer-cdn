@@ -1,13 +1,13 @@
 export default class Cache {
-  static peerfetch = "peerfetch-cache-v";
+  static peerFetch = "peerfetch-cache-v";
 
   constructor(options) {
     // Overkill for this single cache example but this is a best practice
-    this.names = { peerfetch: Cache.peerfetch };
+    this.names = { peerFetch: Cache.peerFetch };
 
     if (options) {
       const { version, names } = options;
-      this.names = { peerfetch: Cache.peerfetch + version || "", ...(names || {}) };
+      this.names = { peerFetch: Cache.peerFetch + version || "", ...(names || {}) };
     }
 
     this.getMiddleware = this.getMiddleware.bind(this);
@@ -52,7 +52,7 @@ export default class Cache {
         // to clone it so we have two streams.
         const responseToCache = response.clone();
 
-        caches.open(this.names.peerfetch).then(function (cache) {
+        caches.open(this.names.peerFetch).then(function (cache) {
           cache.put(request, responseToCache);
         });
       }

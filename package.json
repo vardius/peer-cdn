@@ -1,6 +1,6 @@
 {
   "name": "peer-cdn",
-  "version": "1.0.2-beta",
+  "version": "1.0.3-beta",
   "description": "Lightweight library providing peer to peer CDN functionality",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
@@ -60,9 +60,12 @@
       "loose-envify"
     ]
   },
+  "peerDependencies": {
+    "webrtc-adapter": "^7.2.3"
+  },
   "dependencies": {
-    "peer-data": "^3.2.1",
-    "socket.io": "^2.0.4"
+    "peer-data": "^3.2.4",
+    "socket.io": "^2.3.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
