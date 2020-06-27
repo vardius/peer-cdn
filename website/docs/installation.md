@@ -6,6 +6,8 @@ sidebar_label: Installation
 
 *_PeerCDN_* is a lightweight library providing peer to peer CDN functionality.
 
+The main idea of **[peer-cdn](https://github.com/vardius/peer-cdn)** is to use **WebRTC** with **Service Worker** to allow assets such as *scripts*, *images*, *videos*, *styles* and other files to be shared between peers reducing server usage.
+
 ## Installation
 
 <!--DOCUSAURUS_CODE_TABS-->
