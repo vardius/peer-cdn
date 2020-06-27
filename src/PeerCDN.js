@@ -12,18 +12,18 @@ export default class PeerCDN {
     this.GET = this.GET.bind(this);
   }
 
-  // Register middlewares for a all methods and given route path with one of stategies
+  // Register middleware for a GET method and given route path with one of strategies
   GET(path, strategy, ...middleware) {
-    this.router.use('GET', path, strategy, ...middleware)
+    this.router.use("GET", path, strategy, ...middleware);
   }
 
   // Register handlers for given service worker instance
   register() {
-    [getInstall()].forEach(h => self.addEventListener("install", h));
-    [getActivate()].forEach(h => self.addEventListener("activate", h));
+    [getInstall()].forEach((h) => self.addEventListener("install", h));
+    [getActivate()].forEach((h) => self.addEventListener("activate", h));
     // Register fetch events from array.
     // When an event occurs, they're invoked one at a time, in the order that they're registered.
     // As soon as one handler calls event.respondWith(), none of the other registered handlers will be run.
-    [getFetch(this.router)].forEach(h => self.addEventListener("fetch", h));
+    [getFetch(this.router)].forEach((h) => self.addEventListener("fetch", h));
   }
 }

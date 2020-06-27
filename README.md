@@ -3,31 +3,12 @@
 [![Build Status](https://travis-ci.org/vardius/peer-cdn.svg?branch=master)](https://travis-ci.org/vardius/peer-cdn)
 [![codecov](https://codecov.io/gh/vardius/peer-cdn/branch/master/graph/badge.svg)](https://codecov.io/gh/vardius/peer-cdn)
 [![npm version](https://img.shields.io/npm/v/peer-cdn.svg)](https://www.npmjs.com/package/peer-cdn)
+[![npm downloads](https://img.shields.io/npm/dm/peer-cdn.svg)](https://www.npmjs.com/package/peer-cdn)
 [![license](https://img.shields.io/github/license/vardius/peer-cdn.svg)](LICENSE.md)
 
 Lightweight library providing peer to peer CDN functionality
 
-### Bundle size
-```bash
-┌───────────────────────────────────┐
-│                                   │
-│   Destination: dist/index.es.js   │
-│   Bundle Size:  232.06 KB         │
-│   Minified Size:  103.46 KB       │
-│   Gzipped Size:  28.94 KB         │
-│                                   │
-└───────────────────────────────────┘
-┌────────────────────────────────┐
-│                                │
-│   Destination: dist/index.js   │
-│   Bundle Size:  247.91 KB      │
-│   Minified Size:  95.23 KB     │
-│   Gzipped Size:  27.78 KB      │
-│                                │
-└────────────────────────────────┘
-```
-
-# **This is work in progress!**
+## **This is work in progress!**
 
 You can speed up the process of development. Check [help wanted](https://github.com/vardius/peer-cdn/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) issues and [contribute](https://github.com/vardius/peer-cdn/blob/master/CONTRIBUTING.md#development)
 
@@ -41,26 +22,123 @@ For now I know there might be some issues with:
 - [`client.postMessage()`](https://developer.mozilla.org/en-US/docs/Web/API/Client/postMessage#Browser_compatibility) problems on **Google Chrome Version 64.0.3282.167 (Official Build) (64-bit)** however works on **Mozilla Firefox Quantum 58.0.2 (64-bit)**
 - [range requests](https://github.com/vardius/peer-cdn/issues/7)
 
-### Next steps:
-- [ ] add more tests
-- [ ] resolve browser support
-- [ ] create web pack plugin
-- [ ] improve signalling server
+📖 ABOUT
+==================================================
+Contributors:
 
-## Contribution
+* [Rafał Lorenz](https://rafallorenz.com)
 
-Is *peer-cdn* library missing something ?
+Want to contribute ? Feel free to send pull requests!
 
-No problem! Simply [fork](https://github.com/vardius/peer-cdn/network#fork-destination-box) this repository and create pull request.
+Have problems, bugs, feature ideas?
+We are using the github [issue tracker](https://github.com/vardius/peer-cdn/issues) to manage them.
+
+## 📚 Documentation
+
+For **documentation** (_including examples_), **visit [rafallorenz.com/peer-cdn](https://rafallorenz.com/peer-cdn)**
+
+🚏 HOW TO USE
+==================================================
 
 ## Installation
-
 ```bash
-npm install --save peer-cdn
+$ npm install peer-cdn
 ```
 
-## [Documentation](https://github.com/vardius/peer-cdn/wiki)
+## Basic example
 
-## License
+### main.js
 
-The code is available under the [MIT license](LICENSE.md).
+```js
+"use strict";
+
+import { PeerPlugin } from "peer-cdn";
+
+if ("serviceWorker" in navigator) {
+  // since sw does not support WebRTC yet
+  // this is workaround to use it
+  // we use PeerPlugin on client side
+  const peerPlugin = new PeerPlugin({
+    cacheName: CachePlugin.peerFetch + 1,
+    timeoutAfter: 3000,
+    servers: {
+      iceServers: [
+        {
+          url: "stun:74.125.142.127:19302",
+        },
+      ],
+    },
+    constraints: {
+      ordered: true,
+    },
+  });
+
+  // Set up a listener for messages posted from the service worker.
+  // The service worker is set to post a message to specific client only
+  // so you should see this message event fire once.
+  // You can force it to fire again by visiting this page in an Incognito window.
+  navigator.serviceWorker.addEventListener("message", function (event) {
+    const request = new Request(event.data.url);
+    // mock sw event wrapping request with object
+    const middleware = peerPlugin.getMiddleware({ request });
+
+    // run get method of a created middleware
+    middleware
+      .get()
+      .then(function (response) {
+        // return response to a service worker
+        event.ports[0].postMessage(response);
+      })
+      .catch(function (error) {
+        // return response to a service worker
+        event.ports[0].postMessage(null);
+      });
+  });
+
+  navigator.serviceWorker
+    .register("sw.js")
+    .then(function (registration) {
+      // Registration was successful
+      console.log(
+        "ServiceWorker registration successful with scope: ",
+        registration.scope
+      );
+    })
+    .catch(function (error) {
+      console.error("Service Worker Error", error);
+    });
+}
+```
+
+### sw.js
+
+```js
+// import peer-cdn into service worker
+self.importScripts("https://github.com/vardius/peer-cdn/blob/v1.0.4-beta/dist/index.js");
+
+const { CachePlugin, DelegatePlugin, NetworkPlugin, strategies: { ordered }} = PeerCDN;
+
+const cachePlugin = new CachePlugin({ version: 1 });
+// since sw does not support WebRTC yet we use PeerPlugin on client side 
+// and we delegate request to it with DelegatePlugin
+const delegatePlugin = new DelegatePlugin({ timeoutAfter: 5000 });
+const networkPlugin = new NetworkPlugin();
+
+const cdn = new PeerCDN();
+
+cdn.GET("/css/main.css", ordered,
+    cachePlugin.getMiddleware,
+    delegatePlugin.getMiddleware,
+    networkPlugin.getMiddleware
+);
+
+// We need to register service worker events
+// cdn.register() will add listeners for install, activate and fetch
+// gaining required control
+cdn.register();
+```
+
+📜 [License](LICENSE.md)
+-------
+
+This package is released under the MIT license. See the complete license in the package

@@ -1,0 +1,8 @@
+{
+  "docs": {
+    "Quick Start": ["installation", "sw", "client"],
+    "Plugins": ["cache", "peer", "network", "delegate"],
+    "Router": ["router", "strategies"],
+    "Example": "example"
+  }
+}

@@ -1299,7 +1299,7 @@
       this.router = new Router();
       this.register = this.register.bind(this);
       this.GET = this.GET.bind(this);
-    } // Register middlewares for a all methods and given route path with one of stategies
+    } // Register middleware for a GET method and given route path with one of strategies
 
 
     createClass(PeerCDN, [{
@@ -1311,7 +1311,7 @@
           middleware[_key - 2] = arguments[_key];
         }
 
-        (_this$router = this.router).use.apply(_this$router, ['GET', path, strategy].concat(middleware));
+        (_this$router = this.router).use.apply(_this$router, ["GET", path, strategy].concat(middleware));
       } // Register handlers for given service worker instance
 
     }, {
@@ -9440,23 +9440,24 @@
   }();
 
   var middleware = new Middleware();
-  var STRATEGIES = {
-    fastest: middleware.applyFastest,
-    ordered: middleware.applyOrdered
-  };
+  var exportObj = {
+    CachePlugin: Cache,
+    PeerPlugin: Peer,
+    DelegatePlugin: Delegate,
+    NetworkPlugin: Network,
+    strategies: {
+      fastest: middleware.applyFastest,
+      ordered: middleware.applyOrdered
+    }
+  }; // Merge object for easy access
+
+  Object.assign(PeerCDN, exportObj);
   self.PeerCDN = PeerCDN;
-  self.STRATEGIES = STRATEGIES;
-  self.CachePlugin = Cache;
-  self.PeerPlugin = Peer;
-  self.DelegatePlugin = Delegate;
-  self.NetworkPlugin = Network;
 
   exports.CachePlugin = Cache;
   exports.DelegatePlugin = Delegate;
   exports.NetworkPlugin = Network;
   exports.PeerPlugin = Peer;
-  exports.STRATEGIES = STRATEGIES;
-  exports.default = PeerCDN;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

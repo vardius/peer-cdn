@@ -1,6 +1,15 @@
+---
+id: client
+title: Browser Client
+sidebar_label: Browser Client
+---
+
+## Example
+
+```js
 "use strict";
 
-import { PeerPlugin, CachePlugin } from "/peer-cdn/index.es.js"; // from "peer-cdn";
+import { PeerPlugin } from "peer-cdn";
 
 if ("serviceWorker" in navigator) {
   // since sw does not support WebRTC yet
@@ -56,3 +65,4 @@ if ("serviceWorker" in navigator) {
       console.error("Service Worker Error", error);
     });
 }
+```
