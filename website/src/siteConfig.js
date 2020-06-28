@@ -23,7 +23,7 @@ const users = [
 const siteConfig = {
   title: "peer-cdn", // Title for your website.
   tagline:
-    "Library for files, media streaming/sharing using WebRTC",
+    "Lightweight library providing peer to peer CDN functionality",
   url: "https://rafallorenz.com", // Your website URL
   baseUrl: "/peer-cdn/", // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
@@ -60,8 +60,8 @@ const siteConfig = {
 
   /* Colors for website */
   colors: {
-    primaryColor: "#FFE0B5",
-    secondaryColor: "#8A6552"
+    primaryColor: "#8A6552",
+    secondaryColor: "#FFE0B5"
   },
 
   /* Custom fonts for website */
