@@ -6,6 +6,8 @@
 [![npm downloads](https://img.shields.io/npm/dm/peer-cdn.svg)](https://www.npmjs.com/package/peer-cdn)
 [![license](https://img.shields.io/github/license/vardius/peer-cdn.svg)](LICENSE.md)
 
+<img align="right" height="180px" src="website/src/static/img/logo.png" alt="logo" />
+
 Lightweight library providing peer to peer CDN functionality
 
 📖 ABOUT
