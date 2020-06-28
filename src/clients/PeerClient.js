@@ -83,16 +83,11 @@ export default class PeerClient {
     // signaling server needs us to seed
     // we will connected to a given room
     const room = this.peerData.connect(roomId);
-    room.on("participant", (participant) =>
-      participant.then(function (peer) {
-        //this peer disconnected from room
-        peer.on("disconnected", function () {
-          room.disconnect();
-        });
-        // send the response
-        peer.send(response);
-      })
-    );
+
+    room.on("participant", participant => {
+      // send the response
+      participant.send(response);
+    });
   }
 
   createRoomId() {
