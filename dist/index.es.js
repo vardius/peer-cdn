@@ -1539,45 +1539,68 @@ var Cache = /*#__PURE__*/function () {
 
   }, {
     key: "clearOldCaches",
-    value: function clearOldCaches() {
-      var _this2 = this;
-
-      // Delete all caches that aren't named in CURRENT_CACHES.
-      // While there is only one cache in this example, the same logic will handle the case where
-      // there are multiple versioned caches.
-      var expectedNames = Object.keys(this.names).map(function (key) {
-        return _this2.names[key];
-      });
-      return caches.keys().then(function (cacheNames) {
-        return Promise.all(cacheNames.map(function (cacheName) {
-          if (expectedNames.indexOf(cacheName) === -1) {
-            // If this cache name isn't present in the array of "expected" cache names, then delete it.
-            return caches["delete"](cacheName);
-          }
-        }));
-      });
-    }
-  }, {
-    key: "_createPartialResponse",
     value: function () {
-      var _createPartialResponse2 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee3(request, originalResponse) {
-        var rangeHeader, boundaries, originalBlob, effectiveBoundaries, slicedBlob, slicedBlobSize, slicedResponse;
+      var _clearOldCaches = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee3() {
+        var _this2 = this;
+
+        var expectedNames, cacheNames;
         return regenerator.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
+                // Delete all caches that aren't named in CURRENT_CACHES.
+                // While there is only one cache in this example, the same logic will handle the case where
+                // there are multiple versioned caches.
+                expectedNames = Object.keys(this.names).map(function (key) {
+                  return _this2.names[key];
+                });
+                _context3.next = 3;
+                return caches.keys();
+
+              case 3:
+                cacheNames = _context3.sent;
+                return _context3.abrupt("return", Promise.all(cacheNames.map(function (cacheName) {
+                  if (expectedNames.indexOf(cacheName) === -1) {
+                    // If this cache name isn't present in the array of "expected" cache names, then delete it.
+                    return caches["delete"](cacheName);
+                  }
+                })));
+
+              case 5:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function clearOldCaches() {
+        return _clearOldCaches.apply(this, arguments);
+      }
+
+      return clearOldCaches;
+    }()
+  }, {
+    key: "_createPartialResponse",
+    value: function () {
+      var _createPartialResponse2 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee4(request, originalResponse) {
+        var rangeHeader, boundaries, originalBlob, effectiveBoundaries, slicedBlob, slicedBlobSize, slicedResponse;
+        return regenerator.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
                 if (!(originalResponse.status === 206)) {
-                  _context3.next = 2;
+                  _context4.next = 2;
                   break;
                 }
 
-                return _context3.abrupt("return", originalResponse);
+                return _context4.abrupt("return", originalResponse);
 
               case 2:
                 rangeHeader = request.headers.get('range');
 
                 if (rangeHeader) {
-                  _context3.next = 5;
+                  _context4.next = 5;
                   break;
                 }
 
@@ -1585,11 +1608,11 @@ var Cache = /*#__PURE__*/function () {
 
               case 5:
                 boundaries = this._parseRangeHeader(rangeHeader);
-                _context3.next = 8;
+                _context4.next = 8;
                 return originalResponse.blob();
 
               case 8:
-                originalBlob = _context3.sent;
+                originalBlob = _context4.sent;
                 effectiveBoundaries = this._calculateEffectiveBoundaries(originalBlob, boundaries.start, boundaries.end);
                 slicedBlob = originalBlob.slice(effectiveBoundaries.start, effectiveBoundaries.end);
                 slicedBlobSize = slicedBlob.size;
@@ -1602,14 +1625,14 @@ var Cache = /*#__PURE__*/function () {
                 });
                 slicedResponse.headers.set('Content-Length', String(slicedBlobSize));
                 slicedResponse.headers.set('Content-Range', "bytes ".concat(effectiveBoundaries.start, "-").concat(effectiveBoundaries.end - 1, "/") + originalBlob.size);
-                return _context3.abrupt("return", slicedResponse);
+                return _context4.abrupt("return", slicedResponse);
 
               case 16:
               case "end":
-                return _context3.stop();
+                return _context4.stop();
             }
           }
-        }, _callee3, this);
+        }, _callee4, this);
       }));
 
       function _createPartialResponse(_x2, _x3) {
@@ -9469,14 +9492,8 @@ var PeerClient = /*#__PURE__*/function () {
       // we will connected to a given room
       var room = this.peerData.connect(roomId);
       room.on("participant", function (participant) {
-        return participant.then(function (peer) {
-          //this peer disconnected from room
-          peer.on("disconnected", function () {
-            room.disconnect();
-          }); // send the response
-
-          peer.send(response);
-        });
+        // send the response
+        participant.send(response);
       });
     }
   }, {
@@ -9571,18 +9588,42 @@ var Peer = /*#__PURE__*/function () {
     }
   }, {
     key: "_onPeerRequest",
-    value: function _onPeerRequest(e) {
-      var _this2 = this;
+    value: function () {
+      var _onPeerRequest2 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee2(e) {
+        var cache, response;
+        return regenerator.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.next = 2;
+                return caches.open(this.cacheName);
 
-      // caches.match() will look for a cache entry in all of the caches available to the service worker.
-      caches.open(this.cacheName).then(function (cache) {
-        cache.match(e.data).then(function (response) {
-          if (response) {
-            _this2.client.sendToRoom(e.room.id, response);
+              case 2:
+                cache = _context2.sent;
+                _context2.next = 5;
+                return cache.match(e.data);
+
+              case 5:
+                response = _context2.sent;
+
+                if (response) {
+                  this.client.sendToRoom(e.room.id, response);
+                }
+
+              case 7:
+              case "end":
+                return _context2.stop();
+            }
           }
-        });
-      });
-    }
+        }, _callee2, this);
+      }));
+
+      function _onPeerRequest(_x) {
+        return _onPeerRequest2.apply(this, arguments);
+      }
+
+      return _onPeerRequest;
+    }()
   }]);
 
   return Peer;
