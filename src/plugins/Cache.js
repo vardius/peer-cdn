@@ -70,22 +70,21 @@ export default class Cache {
   }
 
   // Clears old cache, function used in activate event handler
-  clearOldCaches() {
+  async clearOldCaches() {
     // Delete all caches that aren't named in CURRENT_CACHES.
     // While there is only one cache in this example, the same logic will handle the case where
     // there are multiple versioned caches.
     const expectedNames = Object.keys(this.names).map(key => this.names[key]);
 
-    return caches.keys().then(function (cacheNames) {
-      return Promise.all(
-        cacheNames.map(function (cacheName) {
-          if (expectedNames.indexOf(cacheName) === -1) {
-            // If this cache name isn't present in the array of "expected" cache names, then delete it.
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    });
+    const cacheNames = await caches.keys()
+    return Promise.all(
+      cacheNames.map(function (cacheName) {
+        if (expectedNames.indexOf(cacheName) === -1) {
+          // If this cache name isn't present in the array of "expected" cache names, then delete it.
+          return caches.delete(cacheName);
+        }
+      })
+    );
   }
 
   async _createPartialResponse(request, originalResponse) {

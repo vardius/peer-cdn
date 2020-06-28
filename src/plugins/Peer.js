@@ -32,9 +32,9 @@ export default class Peer {
 
           return null;
         } catch (e) {
-          if (process.env.NODE_ENV !== 'production') {
+          if (process.env.NODE_ENV !== "production") {
             // eslint-disable-next-line no-console
-            console.error("PeerPlugin: get error: ", e)
+            console.error("PeerPlugin: get error: ", e);
           }
           return null;
         }
@@ -42,14 +42,12 @@ export default class Peer {
     };
   }
 
-  _onPeerRequest(e) {
+  async _onPeerRequest(e) {
     // caches.match() will look for a cache entry in all of the caches available to the service worker.
-    caches.open(this.cacheName).then((cache) => {
-      cache.match(e.data).then((response) => {
-        if (response) {
-          this.client.sendToRoom(e.room.id, response);
-        }
-      });
-    });
+    const cache = await caches.open(this.cacheName);
+    const response = await cache.match(e.data);
+    if (response) {
+      this.client.sendToRoom(e.room.id, response);
+    }
   }
 }
