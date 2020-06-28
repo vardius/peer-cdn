@@ -34,27 +34,43 @@ if (isProd) {
   );
 }
 
-const config = {
-  input: "src/index.js",
-  external: external,
-  plugins: plugins,
-  treeshake: true,
-  output: [
-    {
-      name: pkg.name,
-      exports: "named",
-      file: pkg.module,
-      format: "es",
-      sourcemap: !isProd,
-    },
-    {
-      name: pkg.name,
-      exports: "named",
-      file: pkg.main,
-      format: "umd",
-      sourcemap: !isProd,
-    },
-  ],
-};
+const config = [
+  {
+    input: "src/index.js",
+    external: external,
+    plugins: plugins,
+    treeshake: true,
+    output: [
+      {
+        name: pkg.name,
+        exports: "named",
+        file: pkg.module,
+        format: "es",
+        sourcemap: !isProd,
+      },
+      {
+        name: pkg.name,
+        exports: "named",
+        file: pkg.main,
+        format: "umd",
+        sourcemap: !isProd,
+      },
+    ],
+  },
+  {
+    input: "src/server/index.js",
+    external: external,
+    treeshake: true,
+    output: [
+      {
+        name: pkg.name,
+        exports: "named",
+        file: "dist/server.index.js",
+        format: "cjs",
+        sourcemap: !isProd,
+      }
+    ],
+  }
+];
 
 export default config;

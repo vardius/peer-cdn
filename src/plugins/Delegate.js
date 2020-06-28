@@ -19,12 +19,6 @@ export default class Delegate {
 
     return {
       get: async () => {
-        // do not cache ranged responses
-        // https://github.com/vardius/peer-cdn/issues/7
-        if (request.headers.has("range")) {
-          return null;
-        }
-
         // Exit early if we don't have access to the client.
         // Eg, if it's cross-origin.
         if (!event.clientId) return null;
@@ -42,6 +36,11 @@ export default class Delegate {
 
           return null;
         } catch (e) {
+          if (process.env.NODE_ENV !== 'production') {
+            // eslint-disable-next-line no-console
+            console.error("DelegatePlugin: get error: ", e)
+          }
+
           return null;
         }
       }

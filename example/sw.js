@@ -3,7 +3,7 @@
 
   // import peer-cdn into service worker
   // this path is exposed with server
-  self.importScripts("/peer-cdn/index.js"); // self.importScripts("https://github.com/vardius/peer-cdn/blob/v1.0.4-beta/dist/index.js");
+  self.importScripts("/peer-cdn/index.js"); // self.importScripts("https://github.com/vardius/peer-cdn/blob/v1.0.5-beta/dist/index.js");
 
   const { CachePlugin, DelegatePlugin, NetworkPlugin, strategies: { ordered }} = PeerCDN;
 
@@ -16,6 +16,13 @@
   function run() {
     const cdn = new PeerCDN();
     cdn.GET("/css/main.css", ordered,
+      cachePlugin.getMiddleware,
+      delegatePlugin.getMiddleware,
+      networkPlugin.getMiddleware
+    );
+
+    // Test range requests
+    cdn.GET("/movie.mp4", ordered,
       cachePlugin.getMiddleware,
       delegatePlugin.getMiddleware,
       networkPlugin.getMiddleware

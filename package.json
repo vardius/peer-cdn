@@ -1,6 +1,6 @@
 {
   "name": "peer-cdn",
-  "version": "1.0.4-beta",
+  "version": "1.0.5-beta",
   "description": "Lightweight library providing peer to peer CDN functionality",
   "main": "dist/index.js",
   "module": "dist/index.es.js",

@@ -17,7 +17,7 @@ const pre = "```";
 
 const baseCodeExample = `${pre}js
 
-self.importScripts("https://github.com/vardius/peer-cdn/blob/v1.0.4-beta/dist/index.js");
+self.importScripts("https://github.com/vardius/peer-cdn/blob/v1.0.5-beta/dist/index.js");
 
 const {CachePlugin, DelegatePlugin, NetworkPlugin, strategies: { ordered }} = PeerCDN;
 

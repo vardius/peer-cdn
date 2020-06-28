@@ -968,10 +968,19 @@
 
                   case 5:
                     response = _context2.sent;
-                    composed.put && composed.put(response);
+
+                    if (!composed.put) {
+                      _context2.next = 9;
+                      break;
+                    }
+
+                    _context2.next = 9;
+                    return composed.put(response);
+
+                  case 9:
                     return _context2.abrupt("return", response);
 
-                  case 8:
+                  case 10:
                   case "end":
                     return _context2.stop();
                 }
@@ -1022,28 +1031,35 @@
                       response = _context3.sent;
 
                       if (!response) {
-                        _context3.next = 9;
+                        _context3.next = 11;
                         break;
                       }
 
-                      // pass response to put method
-                      x.put && x.put(response);
+                      if (!x.put) {
+                        _context3.next = 10;
+                        break;
+                      }
+
+                      _context3.next = 10;
+                      return x.put(response);
+
+                    case 10:
                       return _context3.abrupt("return", {
                         get: function get() {
                           return response;
                         }
                       });
 
-                    case 9:
-                      _context3.next = 11;
+                    case 11:
+                      _context3.next = 13;
                       return b(request);
 
-                    case 11:
+                    case 13:
                       y = _context3.sent;
-                      _context3.next = 14;
+                      _context3.next = 16;
                       return y.get();
 
-                    case 14:
+                    case 16:
                       response = _context3.sent;
                       return _context3.abrupt("return", {
                         get: function get() {
@@ -1052,7 +1068,7 @@
                         put: _this3._composeHandlers(y.put, x.put)
                       });
 
-                    case 16:
+                    case 18:
                     case "end":
                       return _context3.stop();
                   }
@@ -1076,17 +1092,49 @@
 
         // If handler is not a function, mock it
         funcs = funcs.map(function (func) {
-          return function () {
-            if (typeof func === "function") {
-              func.apply(void 0, arguments);
-            }
-          };
+          return /*#__PURE__*/asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee4() {
+            var _args4 = arguments;
+            return regenerator.wrap(function _callee4$(_context4) {
+              while (1) {
+                switch (_context4.prev = _context4.next) {
+                  case 0:
+                    if (!(typeof func === "function")) {
+                      _context4.next = 3;
+                      break;
+                    }
+
+                    _context4.next = 3;
+                    return func.apply(void 0, _args4);
+
+                  case 3:
+                  case "end":
+                    return _context4.stop();
+                }
+              }
+            }, _callee4);
+          }));
         });
         return funcs.reduce(function (a, b) {
-          return function () {
-            a.apply(void 0, arguments);
-            b.apply(void 0, arguments);
-          };
+          return /*#__PURE__*/asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee5() {
+            var _args5 = arguments;
+            return regenerator.wrap(function _callee5$(_context5) {
+              while (1) {
+                switch (_context5.prev = _context5.next) {
+                  case 0:
+                    _context5.next = 2;
+                    return a.apply(void 0, _args5);
+
+                  case 2:
+                    _context5.next = 4;
+                    return b.apply(void 0, _args5);
+
+                  case 4:
+                  case "end":
+                    return _context5.stop();
+                }
+              }
+            }, _callee5);
+          }));
         });
       }
     }]);
@@ -1375,6 +1423,9 @@
 
       this.getMiddleware = this.getMiddleware.bind(this);
       this.clearOldCaches = this.clearOldCaches.bind(this);
+      this._createPartialResponse = this._createPartialResponse.bind(this);
+      this._parseRangeHeader = this._parseRangeHeader.bind(this);
+      this._calculateEffectiveBoundaries = this._calculateEffectiveBoundaries.bind(this);
     } // Middleware factory function for fetch event
 
 
@@ -1392,42 +1443,55 @@
                 while (1) {
                   switch (_context.prev = _context.next) {
                     case 0:
-                      if (!request.headers.has("range")) {
-                        _context.next = 2;
-                        break;
-                      }
-
-                      return _context.abrupt("return", null);
-
-                    case 2:
-                      _context.prev = 2;
-                      _context.next = 5;
+                      _context.prev = 0;
+                      _context.next = 3;
                       return caches.match(request);
 
-                    case 5:
+                    case 3:
                       response = _context.sent;
 
-                      if (!response) {
+                      if (response) {
                         _context.next = 8;
                         break;
                       }
 
-                      return _context.abrupt("return", response);
+                      _context.next = 7;
+                      return caches.match(request.url);
+
+                    case 7:
+                      response = _context.sent;
 
                     case 8:
-                      return _context.abrupt("return", null);
+                      if (!response) {
+                        _context.next = 12;
+                        break;
+                      }
+
+                      if (!request.headers.has("range")) {
+                        _context.next = 11;
+                        break;
+                      }
+
+                      return _context.abrupt("return", _this._createPartialResponse(request, response));
 
                     case 11:
-                      _context.prev = 11;
-                      _context.t0 = _context["catch"](2);
+                      return _context.abrupt("return", response);
+
+                    case 12:
                       return _context.abrupt("return", null);
 
-                    case 14:
+                    case 15:
+                      _context.prev = 15;
+                      _context.t0 = _context["catch"](0);
+
+                      return _context.abrupt("return", null);
+
+                    case 19:
                     case "end":
                       return _context.stop();
                   }
                 }
-              }, _callee, null, [[2, 11]]);
+              }, _callee, null, [[0, 15]]);
             }));
 
             function get() {
@@ -1436,22 +1500,46 @@
 
             return get;
           }(),
-          put: function put(response) {
-            // do not cache ranged responses
-            // https://github.com/vardius/peer-cdn/issues/7
-            if (request.headers.has("range")) {
-              return;
-            } // IMPORTANT: Clone the response. A response is a stream
-            // and because we want the browser to consume the response
-            // as well as the cache consuming the response, we need
-            // to clone it so we have two streams.
+          put: function () {
+            var _put = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee2(response) {
+              var cache, responseToCache;
+              return regenerator.wrap(function _callee2$(_context2) {
+                while (1) {
+                  switch (_context2.prev = _context2.next) {
+                    case 0:
+                      _context2.prev = 0;
+                      _context2.next = 3;
+                      return caches.open(_this.names.peerFetch);
 
+                    case 3:
+                      cache = _context2.sent;
+                      // IMPORTANT: Clone the response. A response is a stream
+                      // and because we want the browser to consume the response
+                      // as well as the cache consuming the response, we need
+                      // to clone it so we have two streams.
+                      responseToCache = response.clone();
+                      cache.put(request, responseToCache);
+                      _context2.next = 11;
+                      break;
 
-            var responseToCache = response.clone();
-            caches.open(_this.names.peerFetch).then(function (cache) {
-              cache.put(request, responseToCache);
-            });
-          }
+                    case 8:
+                      _context2.prev = 8;
+                      _context2.t0 = _context2["catch"](0);
+
+                    case 11:
+                    case "end":
+                      return _context2.stop();
+                  }
+                }
+              }, _callee2, null, [[0, 8]]);
+            }));
+
+            function put(_x) {
+              return _put.apply(this, arguments);
+            }
+
+            return put;
+          }()
         };
       } // Clears old cache, function used in activate event handler
 
@@ -1474,6 +1562,133 @@
             }
           }));
         });
+      }
+    }, {
+      key: "_createPartialResponse",
+      value: function () {
+        var _createPartialResponse2 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee3(request, originalResponse) {
+          var rangeHeader, boundaries, originalBlob, effectiveBoundaries, slicedBlob, slicedBlobSize, slicedResponse;
+          return regenerator.wrap(function _callee3$(_context3) {
+            while (1) {
+              switch (_context3.prev = _context3.next) {
+                case 0:
+                  if (!(originalResponse.status === 206)) {
+                    _context3.next = 2;
+                    break;
+                  }
+
+                  return _context3.abrupt("return", originalResponse);
+
+                case 2:
+                  rangeHeader = request.headers.get('range');
+
+                  if (rangeHeader) {
+                    _context3.next = 5;
+                    break;
+                  }
+
+                  throw new Error('no-range-header');
+
+                case 5:
+                  boundaries = this._parseRangeHeader(rangeHeader);
+                  _context3.next = 8;
+                  return originalResponse.blob();
+
+                case 8:
+                  originalBlob = _context3.sent;
+                  effectiveBoundaries = this._calculateEffectiveBoundaries(originalBlob, boundaries.start, boundaries.end);
+                  slicedBlob = originalBlob.slice(effectiveBoundaries.start, effectiveBoundaries.end);
+                  slicedBlobSize = slicedBlob.size;
+                  slicedResponse = new Response(slicedBlob, {
+                    // Status code 206 is for a Partial Content response.
+                    // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/206
+                    status: 206,
+                    statusText: 'Partial Content',
+                    headers: originalResponse.headers
+                  });
+                  slicedResponse.headers.set('Content-Length', String(slicedBlobSize));
+                  slicedResponse.headers.set('Content-Range', "bytes ".concat(effectiveBoundaries.start, "-").concat(effectiveBoundaries.end - 1, "/") + originalBlob.size);
+                  return _context3.abrupt("return", slicedResponse);
+
+                case 16:
+                case "end":
+                  return _context3.stop();
+              }
+            }
+          }, _callee3, this);
+        }));
+
+        function _createPartialResponse(_x2, _x3) {
+          return _createPartialResponse2.apply(this, arguments);
+        }
+
+        return _createPartialResponse;
+      }()
+    }, {
+      key: "_parseRangeHeader",
+      value: function _parseRangeHeader(rangeHeader) {
+        var normalizedRangeHeader = rangeHeader.trim().toLowerCase();
+
+        if (!normalizedRangeHeader.startsWith('bytes=')) {
+          throw new Error('unit-must-be-bytes', {
+            normalizedRangeHeader: normalizedRangeHeader
+          });
+        } // Specifying multiple ranges separate by commas is valid syntax, but this
+        // library only attempts to handle a single, contiguous sequence of bytes.
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range#Syntax
+
+
+        if (normalizedRangeHeader.includes(',')) {
+          throw new Error('single-range-only', {
+            normalizedRangeHeader: normalizedRangeHeader
+          });
+        }
+
+        var rangeParts = /(\d*)-(\d*)/.exec(normalizedRangeHeader); // We need either at least one of the start or end values.
+
+        if (!rangeParts || !(rangeParts[1] || rangeParts[2])) {
+          throw new Error('invalid-range-values', {
+            normalizedRangeHeader: normalizedRangeHeader
+          });
+        }
+
+        return {
+          start: rangeParts[1] === '' ? undefined : Number(rangeParts[1]),
+          end: rangeParts[2] === '' ? undefined : Number(rangeParts[2])
+        };
+      }
+    }, {
+      key: "_calculateEffectiveBoundaries",
+      value: function _calculateEffectiveBoundaries(blob, start, end) {
+        var blobSize = blob.size;
+
+        if (end && end > blobSize || start && start < 0) {
+          throw new Error('range-not-satisfiable', {
+            size: blobSize,
+            end: end,
+            start: start
+          });
+        }
+
+        var effectiveStart;
+        var effectiveEnd;
+
+        if (start !== undefined && end !== undefined) {
+          effectiveStart = start; // Range values are inclusive, so add 1 to the value.
+
+          effectiveEnd = end + 1;
+        } else if (start !== undefined && end === undefined) {
+          effectiveStart = start;
+          effectiveEnd = blobSize;
+        } else if (end !== undefined && start === undefined) {
+          effectiveStart = blobSize - end;
+          effectiveEnd = blobSize;
+        }
+
+        return {
+          start: effectiveStart,
+          end: effectiveEnd
+        };
       }
     }]);
 
@@ -1618,7 +1833,7 @@
                 while (1) {
                   switch (_context.prev = _context.next) {
                     case 0:
-                      if (!request.headers.has("range")) {
+                      if (event.clientId) {
                         _context.next = 2;
                         break;
                       }
@@ -1626,50 +1841,43 @@
                       return _context.abrupt("return", null);
 
                     case 2:
-                      if (event.clientId) {
-                        _context.next = 4;
-                        break;
-                      }
-
-                      return _context.abrupt("return", null);
-
-                    case 4:
-                      _context.next = 6;
+                      _context.next = 4;
                       return clients.get(event.clientId);
 
-                    case 6:
+                    case 4:
                       client = _context.sent;
                       msgClient = new MessageClient(_this.timeoutAfter);
-                      _context.prev = 8;
-                      _context.next = 11;
+                      _context.prev = 6;
+                      _context.next = 9;
                       return msgClient.sendMessageToClient(client, {
                         url: request.url
                       });
 
-                    case 11:
+                    case 9:
                       response = _context.sent;
 
                       if (!response) {
-                        _context.next = 14;
+                        _context.next = 12;
                         break;
                       }
 
                       return _context.abrupt("return", response);
 
-                    case 14:
+                    case 12:
                       return _context.abrupt("return", null);
 
-                    case 17:
-                      _context.prev = 17;
-                      _context.t0 = _context["catch"](8);
+                    case 15:
+                      _context.prev = 15;
+                      _context.t0 = _context["catch"](6);
+
                       return _context.abrupt("return", null);
 
-                    case 20:
+                    case 19:
                     case "end":
                       return _context.stop();
                   }
                 }
-              }, _callee, null, [[8, 17]]);
+              }, _callee, null, [[6, 15]]);
             }));
 
             function get() {
@@ -9328,42 +9536,35 @@
                 while (1) {
                   switch (_context.prev = _context.next) {
                     case 0:
-                      if (!request.headers.has("range")) {
-                        _context.next = 2;
-                        break;
-                      }
-
-                      return _context.abrupt("return", null);
-
-                    case 2:
-                      _context.prev = 2;
-                      _context.next = 5;
+                      _context.prev = 0;
+                      _context.next = 3;
                       return _this.client.match(request);
 
-                    case 5:
+                    case 3:
                       response = _context.sent;
 
                       if (!response) {
-                        _context.next = 8;
+                        _context.next = 6;
                         break;
                       }
 
                       return _context.abrupt("return", response);
 
-                    case 8:
+                    case 6:
                       return _context.abrupt("return", null);
 
-                    case 11:
-                      _context.prev = 11;
-                      _context.t0 = _context["catch"](2);
+                    case 9:
+                      _context.prev = 9;
+                      _context.t0 = _context["catch"](0);
+
                       return _context.abrupt("return", null);
 
-                    case 14:
+                    case 13:
                     case "end":
                       return _context.stop();
                   }
                 }
-              }, _callee, null, [[2, 11]]);
+              }, _callee, null, [[0, 9]]);
             }));
 
             function get() {

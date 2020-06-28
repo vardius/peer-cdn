@@ -8,20 +8,6 @@
 
 Lightweight library providing peer to peer CDN functionality
 
-## **This is work in progress!**
-
-You can speed up the process of development. Check [help wanted](https://github.com/vardius/peer-cdn/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) issues and [contribute](https://github.com/vardius/peer-cdn/blob/master/CONTRIBUTING.md#development)
-
-### Things to consider:
-- peer matching algorithms (ways of improving - pick best direction to go from here, beta version keeps it simple - pick first)
-- browser support [WebRTC](https://webrtc.org)
-- browser support [`client.postMessage()`](https://developer.mozilla.org/en-US/docs/Web/API/Client/postMessage#Browser_compatibility)
-- media supported (there might be issues with range request)
-
-For now I know there might be some issues with:
-- [`client.postMessage()`](https://developer.mozilla.org/en-US/docs/Web/API/Client/postMessage#Browser_compatibility) problems on **Google Chrome Version 64.0.3282.167 (Official Build) (64-bit)** however works on **Mozilla Firefox Quantum 58.0.2 (64-bit)**
-- [range requests](https://github.com/vardius/peer-cdn/issues/7)
-
 📖 ABOUT
 ==================================================
 Contributors:
@@ -114,7 +100,7 @@ if ("serviceWorker" in navigator) {
 
 ```js
 // import peer-cdn into service worker
-self.importScripts("https://github.com/vardius/peer-cdn/blob/v1.0.4-beta/dist/index.js");
+self.importScripts("https://github.com/vardius/peer-cdn/blob/v1.0.5-beta/dist/index.js");
 
 const { CachePlugin, DelegatePlugin, NetworkPlugin, strategies: { ordered }} = PeerCDN;
 

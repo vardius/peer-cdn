@@ -3,7 +3,7 @@ const fspath = require("path");
 const cookieParser = require("cookie-parser");
 const http = require("http");
 const fs = require("fs");
-const PeerCdnServer = require("../src/server"); // require("peer-cdn/src/server")
+const PeerCdnServer = require("../src/server"); // require("peer-cdn/server")
 
 const PeerEventType = { PEER: "PEER" };
 const port = process.env.PORT || 3000;

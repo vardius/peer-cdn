@@ -24,7 +24,7 @@ There is an easy setup, simply import server from **[peer-cdn](https://github.co
 ```js
 const http = require("http");
 const express = require("express");
-const PeerCdnServer = require("peer-cdn/src/server");
+const PeerCdnServer = require("peer-cdn/server");
 
 const app = express();
 

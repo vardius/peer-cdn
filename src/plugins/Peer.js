@@ -23,12 +23,6 @@ export default class Peer {
 
     return {
       get: async () => {
-        // do not cache ranged responses
-        // https://github.com/vardius/peer-cdn/issues/7
-        if (request.headers.has("range")) {
-          return null;
-        }
-
         try {
           // this.match() will look for an entry in all of the peers available to the service worker.
           const response = await this.client.match(request);
@@ -38,6 +32,10 @@ export default class Peer {
 
           return null;
         } catch (e) {
+          if (process.env.NODE_ENV !== 'production') {
+            // eslint-disable-next-line no-console
+            console.error("PeerPlugin: get error: ", e)
+          }
           return null;
         }
       },

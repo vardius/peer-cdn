@@ -31,7 +31,9 @@ export default class Middleware {
       const composed = await this._composePlugins(middleware)(request);
       const response = await composed.get();
 
-      composed.put && composed.put(response);
+      if (composed.put) {
+        await composed.put(response)
+      }
 
       return response;
     };
@@ -50,7 +52,9 @@ export default class Middleware {
       let response = await x.get();
       if (response) {
         // pass response to put method
-        x.put && x.put(response);
+        if (x.put) {
+          await x.put(response)
+        }
 
         return {
           get: () => response,
@@ -70,15 +74,15 @@ export default class Middleware {
   // Composes handler methods for previous middleware into single one
   _composeHandlers(...funcs) {
     // If handler is not a function, mock it
-    funcs = funcs.map(func => (...args) => {
+    funcs = funcs.map(func => async (...args) => {
       if (typeof func === "function") {
-        func(...args);
+        await func(...args);
       }
     });
 
-    return funcs.reduce((a, b) => (...args) => {
-      a(...args);
-      b(...args);
+    return funcs.reduce((a, b) => async (...args) => {
+      await a(...args);
+      await b(...args);
     });
   }
 }
