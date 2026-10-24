@@ -73,7 +73,7 @@
     }
   },
   "dependencies": {
-    "peer-data": "github:vardius/peer-data#8dc4ee0c4fc5acd1cbe56e4b8885d3a0eb37377e"
+    "peer-data": "^4.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
