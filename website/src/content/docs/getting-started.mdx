@@ -1,0 +1,117 @@
+---
+title: Getting started
+description: Add peer-cdn to a site, a service worker, a line in each page and a signaling server, with Vite or any bundler.
+---
+
+import { Code, LinkCard, CardGrid, Steps } from '@astrojs/starlight/components';
+import worker from '../../../../examples/sw.ts?raw';
+
+A site with peer-cdn has three parts:
+
+- **The service worker** gets your pages' requests for assets and routes them through middleware: this browser's
+  cache, then the other visitors, then your server.
+- **Each page** runs PeerPlugin, which connects to the other visitors' pages over WebRTC. Service workers can't
+  use WebRTC, so the worker asks its page to find files among the visitors, and the page shares what the worker
+  cached.
+- **A signaling server** introduces the pages to each other. After that, files go straight from one browser to
+  another.
+
+## Install
+
+```sh
+npm install peer-cdn socket.io-client
+```
+
+peer-cdn is an ES module with types, and installs [peer-data](https://vardius.github.io/peer-data/), which holds
+the pages' connections. It passes on peer-data's `SocketChannel`, so pages import everything from peer-cdn. The
+signaling server needs socket.io on Node.js: `npm install socket.io` where it runs.
+
+## The service worker
+
+This worker answers requests for everything under `assets/` next to it, from the cache, the visitors, then the
+server:
+
+<Code code={worker} lang="ts" title="sw.ts" />
+
+`ordered` asks each middleware in turn. The ones asked before the one that answered get a copy of the response,
+so what came from the visitors or the server is cached, and this visitor shares it in turn.
+[Routes and strategies](../routing/) covers the rest.
+
+Browsers run a service worker from one script, so bundle the worker before serving it. With Vite, the
+[Vite plugin](../vite/) does that for `vite` and `vite build`:
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import { peerCDN } from 'peer-cdn/vite';
+
+export default defineConfig({
+  plugins: [peerCDN({ worker: 'src/sw.ts' })],
+});
+```
+
+With another bundler, build the worker on its own into one classic script, such as an IIFE, and serve it from
+the top folder of what it should control: a service worker only controls pages at or below its own path.
+
+## The page
+
+```ts
+// main.ts
+import { io } from 'socket.io-client';
+import { PeerPlugin, SocketChannel } from 'peer-cdn';
+
+new PeerPlugin({ signaling: new SocketChannel(io('https://signaling.example.com')) });
+await navigator.serviceWorker.register('/sw.js');
+```
+
+PeerPlugin answers the worker by itself. Create it on every page the worker controls, before the page loads the
+files you route, so it can answer the first requests. Only the worker classes end up in the worker's bundle:
+PeerPlugin and peer-data stay in the page's.
+
+## The signaling server
+
+```ts
+// server.ts
+import { createServer } from 'node:http';
+import { attachSignaling } from 'peer-cdn/server';
+
+const server = createServer();
+attachSignaling(server, { cors: { origin: 'https://www.example.com' } });
+server.listen(8080);
+```
+
+While you develop with Vite, the plugin runs it on Vite's own server, and pages reach it with `io()`.
+[Signaling](../signaling/) covers ICE servers and signaling of your own.
+
+## Run the example
+
+<Steps>
+
+1. Clone the repository and serve the example site:
+
+   ```sh
+   git clone https://github.com/vardius/peer-cdn.git
+   cd peer-cdn
+   npm ci
+   npm run examples
+   ```
+
+2. Open http://localhost:5173 in one browser. It loads six pictures from the server, and its worker caches
+   them.
+
+3. Open the same address in another browser, such as a private window. It finds the first browser and gets the
+   pictures from it: the page shows how many pictures the server has sent, which stays at six. To try another
+   device on your network, serve the example with `npm run examples -- --host`.
+
+</Steps>
+
+Or try it right here, in the [live demo](../demo/).
+
+## Next
+
+<CardGrid>
+	<LinkCard title="Routes and strategies" href="../routing/" description="Which requests the worker answers, and in what order it asks." />
+	<LinkCard title="Plugins" href="../plugins/" description="The cache, the network, the visitors, and middleware of your own." />
+	<LinkCard title="Peers" href="../peers/" description="What visitors share, how files travel, and what to route." />
+	<LinkCard title="Vite" href="../vite/" description="Serve and build the worker, with signaling on Vite's server." />
+</CardGrid>

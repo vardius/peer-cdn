@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>peer-cdn example</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <h1>peer-cdn example</h1>
+    <p>
+      Open this page in a second browser, or in a private window, while this one stays open. The second gets the
+      pictures from this one over WebRTC, and the server's count stays the same. Tabs of one browser share its cache, so
+      they never need a peer.
+    </p>
+    <p id="status" class="status" role="status">Looking for other visitors…</p>
+    <div id="gallery" class="gallery"></div>
+    <p id="served" class="status" aria-live="polite"></p>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

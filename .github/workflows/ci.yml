@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      # The package builds with TypeScript 6; make sure the native TypeScript 7 compiler accepts it too.
+      - name: Typecheck with TypeScript 7
+        run: npx -y -p typescript@7.0.2 tsc --noEmit
+      - run: npm run lint
+      - run: npm run format:check
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+      # Firefox gathers no ICE candidates at all when IPv6 is on but has no route, as on this runner.
+      - name: Turn off IPv6, for Firefox's WebRTC
+        run: sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1 net.ipv6.conf.default.disable_ipv6=1
+      - run: npm test
+      - run: npm run build
+      - name: Check the package contents
+        run: npm pack --dry-run

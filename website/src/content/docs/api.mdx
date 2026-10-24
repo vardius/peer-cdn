@@ -1,0 +1,149 @@
+---
+title: API reference
+description: Every class, function and type peer-cdn exports, in the worker, the page, the signaling server and the Vite plugin.
+---
+
+peer-cdn has three entry points:
+
+```ts
+// The service worker and the page
+import { CachePlugin, DelegatePlugin, NetworkPlugin, PeerCDN, PeerPlugin, fastest, ordered } from 'peer-cdn';
+import { BroadcastChannelSignaling, SocketChannel } from 'peer-cdn';
+import type { Middleware, MiddlewareFactory, Signaling, Strategy } from 'peer-cdn';
+
+// Node.js: the signaling server
+import { attachSignaling } from 'peer-cdn/server';
+
+// vite.config.ts
+import { peerCDN } from 'peer-cdn/vite';
+```
+
+A worker bundle takes only what it imports from `peer-cdn`: PeerPlugin, and peer-data with it, stay out.
+`SocketChannel`, `BroadcastChannelSignaling` and `Signaling` are [peer-data's](https://vardius.github.io/peer-data/api/),
+passed on so pages import everything from peer-cdn.
+
+## PeerCDN
+
+The service worker's router.
+
+### `cdn.GET(path, strategy, ...middleware): this`
+
+Answers GET requests for `path`, and every path below it, with `middleware` combined by `strategy`. A segment
+that starts with `:` matches any one segment, and the most specific route wins: see
+[How routes match](../routing/#how-routes-match). A route with the same shape as an earlier one replaces it.
+
+### `cdn.register(scope?): void`
+
+Listens for the worker's `install`, `activate` and `fetch` events. A new worker skips waiting and claims the open
+pages. A GET request to the worker's origin on a route goes through it; when no middleware answers, or the
+strategy throws, the request goes to the network. Other requests are left to the browser, and so are page
+loads, frames, embedded objects, workers, worklets and XSLT stylesheets on any route.
+
+`scope` is the worker's global scope, `self` by default; tests pass a `WorkerScope` of their own.
+
+## Strategies
+
+| Function | |
+| --- | --- |
+| `ordered(...middleware): Handler` | Asks each middleware in turn, and stops at the first response. Each one asked before it gets a copy through `put`. |
+| `fastest(...middleware): Handler` | Asks every middleware at once, and answers with the first response. Every other one gets a copy through `put`. |
+
+Copies are stored after the worker answers, under the fetch event's `waitUntil`. A middleware that throws counts
+as having nothing, and the error is reported as uncaught.
+
+## CachePlugin
+
+### `new CachePlugin(options?)`
+
+| Option | Type | |
+| --- | --- | --- |
+| `cacheName` | `string` | The cache to answer from and keep responses in. PeerPlugin must use the same name to share them. Defaults to `"peer-cdn"`. |
+
+| Member | |
+| --- | --- |
+| `cacheName: string` | The cache's name. |
+| `getMiddleware: MiddlewareFactory` | Answers from the cache, a Range request with its part; keeps whole 200 responses not marked `no-store`. Deletes and passes on a cached body that doesn't match the request's `integrity`. Gives a response marked `Peer-CDN-Unchecked` only to requests for images, fonts and media. |
+
+## DelegatePlugin
+
+### `new DelegatePlugin(options?)`
+
+| Option | Type | |
+| --- | --- | --- |
+| `timeout` | `number` | How long to wait for the page's answer once it acknowledged the request, in ms. Defaults to `5000`. |
+| `clients` | `ClientsLike` | The worker's clients. Defaults to the global `clients`. |
+
+| Member | |
+| --- | --- |
+| `getMiddleware: MiddlewareFactory` | Asks the request's page, or another open page of the site, to find the response among the visitors: for images, fonts, audio, video and text tracks, marking what comes back `Peer-CDN-Unchecked`, and for other requests only with a SHA-256, SHA-384 or SHA-512 hash in their `integrity`, dropping a response that doesn't match it. A page that doesn't acknowledge within 500 ms is passed over. |
+
+## NetworkPlugin
+
+### `new NetworkPlugin()`
+
+| Member | |
+| --- | --- |
+| `getMiddleware: MiddlewareFactory` | Fetches the request. Answers `null` when the fetch fails, as when the browser is offline. |
+
+## PeerPlugin
+
+The page side: connects to the other visitors' pages, shares the worker's cache with them, and answers the
+worker's DelegatePlugin.
+
+### `new PeerPlugin(options)`
+
+| Option | Type | |
+| --- | --- | --- |
+| `signaling` | `Signaling` | How the page reaches the others: any [peer-data signaling](https://vardius.github.io/peer-data/signaling/). Required. |
+| `cacheName` | `string` | The cache whose responses the page shares: the CachePlugin's. Defaults to `"peer-cdn"`. |
+| `room` | `string` | The room the visitors meet in. Defaults to `"peer-cdn"`. |
+| `configuration` | `RTCConfiguration` | Passed to every `RTCPeerConnection`: ICE servers and the rest. |
+| `timeout` | `number` | How long a lookup may take, the transfer included, in ms. Defaults to `3000`. |
+| `maxSize` | `number` | The largest body to send or accept, in bytes. Defaults to `2097152` (2 MiB). |
+| `onPeers` | `(count: number) => void` | Called with the number of connected visitors whenever it changes. |
+
+The constructor joins the room straight away, and starts answering the worker.
+
+| Member | |
+| --- | --- |
+| `peers: number` | The number of visitors the page is connected to now. |
+| `fetch(url): Promise<Response \| null>` | Asks them for `url`, relative to the page. Resolves with the first response, or `null` when none has it, the time runs out, or there are no visitors. Nothing checks what a visitor sent. |
+| `close(): void` | Leaves the visitors and stops answering the worker. Lookups in progress resolve with `null`. Calling it again does nothing. |
+
+## attachSignaling
+
+### `attachSignaling(httpServer, options?): Server`
+
+From `peer-cdn/server`. Runs a socket.io 4 signaling server on `httpServer`, a Node.js `http.Server` or
+`Http2SecureServer`, and returns socket.io's `Server`. `options` is socket.io's server options, such as `cors`.
+Each socket joins with 16 peer ids at most. See [Signaling](../signaling/#peer-cdns-server).
+
+## peerCDN
+
+### `peerCDN(options): Plugin`
+
+From `peer-cdn/vite`. A Vite 8 plugin that serves and builds the service worker as `sw.js` below the site's
+base, and runs the signaling server on Vite's dev and preview servers.
+
+| Option | Type | |
+| --- | --- | --- |
+| `worker` | `string` | The worker's entry, relative to Vite's root, such as `"src/sw.ts"`. Required. |
+| `signaling` | `boolean` | Run the signaling server on Vite's servers. Defaults to `true`. |
+
+See [Vite](../vite/).
+
+## Types
+
+| Type | |
+| --- | --- |
+| `Middleware` | `{ get(): Response \| null \| Promise<…>; put?(response): void \| Promise<void> }`: one source of responses for one request. |
+| `MiddlewareFactory` | `(event: FetchEventLike) => Middleware`: what a plugin's `getMiddleware` is. |
+| `Handler` | `(event: FetchEventLike) => Promise<Response \| null>`: a route's handler. |
+| `Strategy` | `(...middleware: MiddlewareFactory[]) => Handler`: `ordered`, `fastest`, or your own. |
+| `FetchEventLike` | The parts of a `FetchEvent` peer-cdn uses: `request`, `clientId`, `respondWith`, `waitUntil`. |
+| `ExtendableEventLike` | The parts of an install or activate event peer-cdn uses: `waitUntil`. |
+| `WorkerScope` | The parts of the worker's global scope `register` uses. |
+| `ClientLike`, `ClientsLike` | The parts of a worker's `Client` and `clients` DelegatePlugin uses. |
+| `CachePluginOptions`, `DelegatePluginOptions`, `PeerPluginOptions` | The options above. |
+
+`PeerCDNPluginOptions` is exported from `peer-cdn/vite`.

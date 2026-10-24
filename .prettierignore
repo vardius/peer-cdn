@@ -1,0 +1,4 @@
+dist/
+website/
+package-lock.json
+test/sw/worker.built.js

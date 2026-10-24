@@ -1,0 +1,305 @@
+---
+// Two visitors of a site, in this page, each with a cache of its own, signaling over BroadcastChannel: no
+// server but the one that sends the pictures. Other tabs showing the demo join the same visitors. The visitors
+// are examples/visitors/visitor.ts, which has its own tests.
+const pictures = ['Dunes', 'Tide', 'Orbit', 'Mosaic', 'Bloom', 'Peaks'];
+---
+
+<div class="visitors-demo not-content" data-visitors-demo>
+	<p class="server" role="status">Your server has sent 0 pictures.</p>
+	<div class="visitors">
+		{
+			[1, 2].map((n) => (
+				<section class="visitor" aria-labelledby={`visitor-name-${n}`}>
+					<header>
+						<h3 class="name" id={`visitor-name-${n}`}>
+							Visitor {n}
+						</h3>
+						<p class="status" role="status">
+							Looking for other visitors…
+						</p>
+					</header>
+					<ul class="pictures">
+						{pictures.map((name) => (
+							<li>
+								<img alt={name} width="120" height="80" />
+								<span class="from">Not loaded</span>
+							</li>
+						))}
+					</ul>
+					<div class="actions">
+						<button type="button" class="load">
+							Load the pictures
+						</button>
+						<button type="button" class="forget">
+							Clear the cache
+						</button>
+					</div>
+				</section>
+			))
+		}
+	</div>
+</div>
+
+<script>
+	import { BroadcastChannelSignaling } from 'peer-cdn';
+	import { visit, type Source } from '../../../examples/visitors/visitor';
+	import dunes from '../../../examples/assets/dunes.svg?url&no-inline';
+	import tide from '../../../examples/assets/tide.svg?url&no-inline';
+	import orbit from '../../../examples/assets/orbit.svg?url&no-inline';
+	import mosaic from '../../../examples/assets/mosaic.svg?url&no-inline';
+	import bloom from '../../../examples/assets/bloom.svg?url&no-inline';
+	import peaks from '../../../examples/assets/peaks.svg?url&no-inline';
+
+	// no-inline: a picture under Vite's inline limit would get a data: URL, which no cache or visitor can hold.
+	const URLS = [dunes, tide, orbit, mosaic, bloom, peaks].map((url) => new URL(url, location.href).href);
+	const FROM: Record<Source, string> = { cache: 'From its cache', peers: 'From a visitor', server: 'From the server' };
+
+	for (const demo of document.querySelectorAll<HTMLElement>('[data-visitors-demo]')) runVisitorsDemo(demo);
+	// A page restored from the back-forward cache has left the other visitors: join afresh.
+	window.addEventListener('pageshow', (event) => {
+		if (event.persisted) location.reload();
+	});
+
+	function runVisitorsDemo(demo: HTMLElement): void {
+		const server = demo.querySelector('.server');
+		let sent = 0;
+		const slot = nextSlot();
+
+		for (const [i, panel] of demo.querySelectorAll<HTMLElement>('.visitor').entries()) {
+			const status = panel.querySelector('.status');
+			const load = panel.querySelector<HTMLButtonElement>('.load');
+			const forget = panel.querySelector<HTMLButtonElement>('.forget');
+			const items = [...panel.querySelectorAll('.pictures li')];
+			if (!status || !load || !forget) continue;
+
+			const visitor = visit({
+				signaling: new BroadcastChannelSignaling('peer-cdn-demo'),
+				room: 'peer-cdn-demo',
+				// A cache of its own, as a visitor in another browser has. Tabs take turns with the names.
+				cacheName: `peer-cdn-demo-${String(slot)}-${String(i)}`,
+				onPeers: (count) => {
+					status.textContent =
+						count === 0
+							? 'Looking for other visitors…'
+							: `Connected to ${String(count)} other ${count === 1 ? 'visitor' : 'visitors'}`;
+				},
+			});
+			window.addEventListener('pagehide', visitor.leave);
+
+			const show = (item: Element, picture: Blob | undefined, from: string, source = ''): void => {
+				const image = item.querySelector('img');
+				const label = item.querySelector<HTMLElement>('.from');
+				if (!image || !label) return;
+				if (image.src) URL.revokeObjectURL(image.src);
+				if (picture) image.src = URL.createObjectURL(picture);
+				else image.removeAttribute('src');
+				label.textContent = from;
+				label.dataset.source = source;
+			};
+
+			const clear = async (): Promise<void> => {
+				await visitor.forget();
+				for (const item of items) show(item, undefined, 'Not loaded');
+			};
+
+			load.addEventListener('click', async () => {
+				load.disabled = true;
+				load.textContent = 'Loading…';
+				await Promise.all(
+					items.map(async (item, n) => {
+						const url = URLS[n];
+						if (!url) return;
+						try {
+							const { response, from } = await visitor.load(url);
+							show(item, await response.blob(), FROM[from], from);
+							if (from === 'server' && server) {
+								sent++;
+								server.textContent = `Your server has sent ${String(sent)} ${sent === 1 ? 'picture' : 'pictures'}.`;
+							}
+						} catch {
+							show(item, undefined, 'Failed to load');
+						}
+					}),
+				);
+				load.disabled = false;
+				load.textContent = 'Load the pictures';
+			});
+			forget.addEventListener('click', () => void clear());
+
+			// Each visit starts with an empty cache.
+			void clear();
+		}
+	}
+
+	/** Which of four pairs of cache names this tab takes, so tabs open side by side keep their own. */
+	function nextSlot(): number {
+		const key = 'peer-cdn-demo-slot';
+		try {
+			const stored = Number(localStorage.getItem(key));
+			const slot = Number.isInteger(stored) ? stored % 4 : 0;
+			localStorage.setItem(key, String(slot + 1));
+			return slot;
+		} catch {
+			// No storage, as in some private windows: pick one at random.
+			return Math.floor(Math.random() * 4);
+		}
+	}
+</script>
+
+<style>
+	.visitors-demo {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.server {
+		margin: 0;
+		padding: 0.75rem 1rem;
+		border: 1px solid var(--sl-color-hairline-light);
+		border-radius: 0.75rem;
+		color: var(--sl-color-white);
+		font-weight: 600;
+	}
+
+	.visitors {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+		gap: 1rem;
+	}
+
+	.visitor {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		border: 1px solid var(--sl-color-hairline-light);
+		border-radius: 0.75rem;
+		background: var(--sl-color-bg-nav);
+		overflow: hidden;
+	}
+
+	header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.25rem 1rem;
+		padding: 0.75rem 1rem;
+		border-bottom: 1px solid var(--sl-color-hairline-light);
+	}
+
+	.name {
+		margin: 0;
+		font-size: var(--sl-text-lg);
+		color: var(--sl-color-white);
+	}
+
+	.status {
+		margin: 0;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+
+	.pictures {
+		display: grid;
+		/* Six pictures in two rows at every width, so the buttons stay in view on a phone. */
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.75rem 0.5rem;
+		margin: 0;
+		padding: 1rem;
+		list-style: none;
+	}
+
+	.pictures li {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		min-width: 0;
+		margin: 0;
+	}
+
+	img {
+		width: 100%;
+		height: auto;
+		aspect-ratio: 3 / 2;
+		border-radius: 0.375rem;
+		background: var(--sl-color-gray-6);
+		object-fit: cover;
+	}
+
+	/* An image with no picture yet: an empty tile, without the browser's broken-image icon and alt text. */
+	img:not([src]) {
+		visibility: hidden;
+	}
+
+	.pictures li:has(img:not([src]))::before {
+		content: '';
+		order: -1;
+		aspect-ratio: 3 / 2;
+		border: 1px dashed var(--sl-color-gray-5);
+		border-radius: 0.375rem;
+	}
+
+	.pictures li:has(img:not([src])) img {
+		display: none;
+	}
+
+	.from {
+		font-size: var(--sl-text-xs);
+		line-height: 1.3;
+		color: var(--sl-color-gray-3);
+		overflow-wrap: anywhere;
+	}
+
+	.from[data-source='server'] {
+		color: var(--sl-color-white);
+	}
+
+	.from[data-source='peers'] {
+		color: var(--sl-color-accent);
+		font-weight: 600;
+	}
+
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-top: auto;
+		padding: 0.75rem;
+		border-top: 1px solid var(--sl-color-hairline-light);
+	}
+
+	button {
+		flex: 1 0 auto;
+		padding: 0.5rem 1rem;
+		border: 1px solid transparent;
+		border-radius: 0.5rem;
+		font: inherit;
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.load {
+		background: var(--sl-color-accent);
+		color: var(--sl-color-black);
+	}
+
+	.load:hover {
+		background: var(--sl-color-accent-high);
+	}
+
+	.load:disabled {
+		opacity: 0.6;
+		cursor: progress;
+	}
+
+	.forget {
+		border-color: var(--sl-color-gray-5);
+		background: none;
+		color: var(--sl-color-white);
+	}
+
+	.forget:hover {
+		border-color: var(--sl-color-gray-3);
+	}
+</style>

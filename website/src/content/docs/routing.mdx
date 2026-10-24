@@ -1,0 +1,92 @@
+---
+title: Routes and strategies
+description: Which requests peer-cdn's service worker answers, how routes match paths, and how ordered and fastest combine middleware.
+---
+
+The service worker routes requests with a `PeerCDN`. Each route sends the requests for a path through
+middleware, combined by a strategy:
+
+```ts
+import { CachePlugin, DelegatePlugin, NetworkPlugin, PeerCDN, fastest, ordered } from 'peer-cdn';
+
+const cache = new CachePlugin();
+const peers = new DelegatePlugin();
+const network = new NetworkPlugin();
+
+new PeerCDN()
+  .GET('/images', ordered, cache.getMiddleware, peers.getMiddleware, network.getMiddleware)
+  .GET('/fonts', fastest, cache.getMiddleware, network.getMiddleware)
+  .register();
+```
+
+`register()` listens for the worker's events. A new worker takes over at once, without waiting for the pages of
+the old one to close, and starts answering the pages already open.
+
+## Which requests
+
+The worker answers a request when it is a GET, to the worker's own origin, on one of its routes. Everything else
+is left to the browser, as if there were no worker: requests to other origins, requests other than GET, and
+paths off the routes.
+
+Page loads, frames, embedded objects, workers, worklets and XSLT stylesheets are left to the browser too, on any
+route. What a visitor sent for one of them would run on your site, and no Subresource Integrity can check it, so
+they always come from your server. Of the rest, the visitors send only images, fonts and media, unless the
+request carries Subresource Integrity metadata: see [Only route public assets](../peers/#only-route-public-assets).
+
+When no middleware answers a request on a route, the worker fetches it from the network. A strategy that throws
+is reported as an uncaught error in the worker, and the request goes to the network too.
+
+## How routes match
+
+- **A route covers the paths below it.** `/images` matches `/images`, `/images/logo.png` and
+  `/images/icons/a.svg`, but not `/imagesets`: paths match by whole segments.
+- **`/` matches every path.**
+- **A segment that starts with `:` matches any one segment.** `/static/:file` matches `/static/logo.png`, but not
+  `/static` itself; `/:lang/docs` matches `/en/docs/intro`.
+- **The most specific route answers.** The longer route wins, whatever order you added them in. Of routes as
+  long, the one with a fixed segment first wins over one with a `:` segment there.
+- **A route with the same shape replaces the one before**: `/static/:file` and `/static/:name` are the same
+  route.
+
+Paths are compared without the query string, and empty segments are ignored, so `//images//logo.png` is
+`/images/logo.png`.
+
+## Strategies
+
+A strategy combines middleware into the route's handler. Each middleware is one source of responses: its `get`
+returns a response, or `null` to pass. One with a `put`, as CachePlugin has, keeps responses other middleware
+found.
+
+### ordered
+
+Asks each middleware in turn and stops at the first response. Each middleware asked before it, which had
+nothing, gets its own copy through `put`. With the cache first, what the visitors or the network returned is
+cached on the way.
+
+### fastest
+
+Asks every middleware at once and answers with the first response. Every other middleware gets its own copy
+through `put`. A middleware that answers `null` doesn't end the race; the request goes to the network only when
+all of them pass.
+
+### Copies
+
+The worker answers the page first and stores the copies after, keeping itself alive with the fetch event's
+`waitUntil` until they are stored. A middleware that throws, in `get` or `put`, is reported as an uncaught error
+and counts as having nothing.
+
+## Writing your own
+
+A strategy is a function from middleware factories to a handler:
+
+```ts
+import type { Strategy } from 'peer-cdn';
+
+// Only ever asks the first middleware.
+const first: Strategy =
+  (...factories) =>
+  async (event) =>
+    (await factories[0]?.(event).get()) ?? null;
+```
+
+For middleware of your own, see [Plugins](../plugins/#your-own-middleware).

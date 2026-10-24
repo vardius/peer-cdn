@@ -1,0 +1,41 @@
+---
+title: Live demo
+description: Two visitors on this page, each with a cache of its own, get pictures from each other over WebRTC before asking the server.
+---
+
+import { Code } from '@astrojs/starlight/components';
+import VisitorsDemo from '../../components/VisitorsDemo.astro';
+import visitor from '../../../../examples/visitors/visitor.ts?raw';
+
+Everything below runs in your browser. On a real site, each visitor is a different browser and peer-cdn's
+service worker does the loading. Here, two visitors share this page, each with a cache of its own, and load the
+pictures the way the worker would: from their cache, then from the other visitors, then from the server.
+
+<VisitorsDemo />
+
+## What to try
+
+1. **Load the pictures as Visitor 1.** No one has them yet, so they come from the server, which this site is
+   served from. Visitor 1 keeps them in its cache.
+2. **Load them as Visitor 2.** Visitor 1 has them, so they come from Visitor 1 over a WebRTC data channel, and
+   the server's count stays the same.
+3. **Load them again** as either visitor. They come from its own cache.
+4. **Clear Visitor 1's cache, then load.** Visitor 2 sends them back.
+
+Open this page in another tab of the same browser and its visitors join in too.
+
+## How it's built
+
+Each visitor runs PeerPlugin, the part of peer-cdn that runs in pages, with a cache name of its own. They find
+each other through peer-data's `BroadcastChannelSignaling`, which reaches the pages of one browser with no
+server. `load` stands in for the service worker with its CachePlugin, DelegatePlugin and NetworkPlugin:
+
+<Code code={visitor} lang="ts" title="examples/visitors/visitor.ts" />
+
+The pictures are the ones the [example site](../examples/) serves. PeerPlugin shares them because they are
+same-origin 200 responses not marked `private` or `no-store`: see [what visitors share](../peers/#what-visitors-share).
+
+## Where this works
+
+The visitors signal over `BroadcastChannel`, which reaches pages of the same origin in one browser. To connect
+different browsers or devices, pages need a signaling server: see [Signaling](../signaling/).

@@ -1,132 +1,113 @@
-# peer-cdn
+# 🌐 peer-cdn
 
-[![Build Status](https://travis-ci.org/vardius/peer-cdn.svg?branch=master)](https://travis-ci.org/vardius/peer-cdn)
-[![codecov](https://codecov.io/gh/vardius/peer-cdn/branch/master/graph/badge.svg)](https://codecov.io/gh/vardius/peer-cdn)
+[![CI](https://github.com/vardius/peer-cdn/actions/workflows/ci.yml/badge.svg)](https://github.com/vardius/peer-cdn/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/peer-cdn.svg)](https://www.npmjs.com/package/peer-cdn)
-[![npm downloads](https://img.shields.io/npm/dm/peer-cdn.svg)](https://www.npmjs.com/package/peer-cdn)
-[![license](https://img.shields.io/github/license/vardius/peer-cdn.svg)](LICENSE.md)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 
-<img align="right" height="180px" src="website/src/static/img/logo.png" alt="logo" />
+A peer-to-peer CDN for your site: a service worker serves your assets from other visitors' browsers over WebRTC
+before asking your server.
 
-Lightweight library providing peer to peer CDN functionality
+- **Routes in your service worker.** Send requests for a path through middleware, asked in order or all at once:
+  the cache, the other visitors, the network, or your own.
+- **Visitors share their cache.** Each open page shares the responses its worker cached and finds responses among
+  the other visitors for its worker, over [peer-data](https://github.com/vardius/peer-data) data channels.
+- **Careful with what it shares.** Peers share only same-origin 200 responses not marked `private` or `no-store`.
+  The worker takes images, fonts and media from them, and scripts, stylesheets and other files only when they
+  match the request's Subresource Integrity metadata. Page loads, frames and workers always come from your server.
+- **The network as a fallback.** What no cache or peer has comes from your server, and requests you don't route
+  are left to the browser.
+- **Small.** ES modules with types, written in strict TypeScript. The worker side has no dependencies.
+- **A Vite plugin.** `peer-cdn/vite` serves and builds the worker as one script, and runs the signaling server on
+  Vite's dev and preview servers.
 
-📖 ABOUT
-==================================================
-Contributors:
+📖 **[Documentation](https://vardius.github.io/peer-cdn/)** · [Live demo](https://vardius.github.io/peer-cdn/demo/) · [Examples](examples) · [Migrating from v1](MIGRATION.md)
 
-* [Rafał Lorenz](https://rafallorenz.com)
+## Install
 
-Want to contribute ? Feel free to send pull requests!
-
-Have problems, bugs, feature ideas?
-We are using the github [issue tracker](https://github.com/vardius/peer-cdn/issues) to manage them.
-
-## 📚 Documentation
-
-For **documentation** (_including examples_), **visit [rafallorenz.com/peer-cdn](https://rafallorenz.com/peer-cdn)**
-
-🚏 HOW TO USE
-==================================================
-
-## Installation
-```bash
-$ npm install peer-cdn
+```sh
+npm install peer-cdn socket.io-client
 ```
 
-## Basic example
+The signaling server needs socket.io on Node.js: `npm install socket.io` where it runs.
 
-### main.js
+## Quick start
 
-```js
-"use strict";
+A site with peer-cdn has three parts. The **service worker** routes requests for your assets:
 
-import { PeerPlugin } from "peer-cdn";
+```ts
+// sw.ts
+import { CachePlugin, DelegatePlugin, NetworkPlugin, PeerCDN, ordered } from 'peer-cdn';
 
-if ("serviceWorker" in navigator) {
-  // since sw does not support WebRTC yet
-  // this is workaround to use it
-  // we use PeerPlugin on client side
-  const peerPlugin = new PeerPlugin({
-    cacheName: CachePlugin.peerFetch + 1,
-    timeoutAfter: 3000,
-    servers: {
-      iceServers: [
-        {
-          url: "stun:74.125.142.127:19302",
-        },
-      ],
-    },
-    constraints: {
-      ordered: true,
-    },
-  });
+const cache = new CachePlugin();
+const peers = new DelegatePlugin();
+const network = new NetworkPlugin();
 
-  // Set up a listener for messages posted from the service worker.
-  // The service worker is set to post a message to specific client only
-  // so you should see this message event fire once.
-  // You can force it to fire again by visiting this page in an Incognito window.
-  navigator.serviceWorker.addEventListener("message", function (event) {
-    const request = new Request(event.data.url);
-    // mock sw event wrapping request with object
-    const middleware = peerPlugin.getMiddleware({ request });
-
-    // run get method of a created middleware
-    middleware
-      .get()
-      .then(function (response) {
-        // return response to a service worker
-        event.ports[0].postMessage(response);
-      })
-      .catch(function (error) {
-        // return response to a service worker
-        event.ports[0].postMessage(null);
-      });
-  });
-
-  navigator.serviceWorker
-    .register("sw.js")
-    .then(function (registration) {
-      // Registration was successful
-      console.log(
-        "ServiceWorker registration successful with scope: ",
-        registration.scope
-      );
-    })
-    .catch(function (error) {
-      console.error("Service Worker Error", error);
-    });
-}
+// From this browser's cache, then from other visitors, then from the server, caching what comes back.
+new PeerCDN().GET('/assets', ordered, cache.getMiddleware, peers.getMiddleware, network.getMiddleware).register();
 ```
 
-### sw.js
+Bundle it into one script with your bundler. Only the worker classes end up in it: PeerPlugin and peer-data stay
+out. With Vite, `peer-cdn/vite` does it for you, and runs the signaling server while you develop:
 
-```js
-// import peer-cdn into service worker
-self.importScripts("https://github.com/vardius/peer-cdn/blob/v1.0.5-beta/dist/index.js");
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import { peerCDN } from 'peer-cdn/vite';
 
-const { CachePlugin, DelegatePlugin, NetworkPlugin, strategies: { ordered }} = PeerCDN;
-
-const cachePlugin = new CachePlugin({ version: 1 });
-// since sw does not support WebRTC yet we use PeerPlugin on client side 
-// and we delegate request to it with DelegatePlugin
-const delegatePlugin = new DelegatePlugin({ timeoutAfter: 5000 });
-const networkPlugin = new NetworkPlugin();
-
-const cdn = new PeerCDN();
-
-cdn.GET("/css/main.css", ordered,
-    cachePlugin.getMiddleware,
-    delegatePlugin.getMiddleware,
-    networkPlugin.getMiddleware
-);
-
-// We need to register service worker events
-// cdn.register() will add listeners for install, activate and fetch
-// gaining required control
-cdn.register();
+export default defineConfig({ plugins: [peerCDN({ worker: 'src/sw.ts' })] });
 ```
 
-📜 [License](LICENSE.md)
--------
+**Each page** registers the worker and joins the other visitors:
 
-This package is released under the MIT license. See the complete license in the package
+```ts
+// main.ts
+import { io } from 'socket.io-client';
+import { PeerPlugin, SocketChannel } from 'peer-cdn';
+
+new PeerPlugin({ signaling: new SocketChannel(io('https://signaling.example.com')) });
+await navigator.serviceWorker.register('/sw.js');
+```
+
+A **signaling server** introduces the pages to each other:
+
+```ts
+// server.ts
+import { createServer } from 'node:http';
+import { attachSignaling } from 'peer-cdn/server';
+
+const server = createServer();
+attachSignaling(server, { cors: { origin: 'https://www.example.com' } });
+server.listen(8080);
+```
+
+[examples](examples) is this site, runnable with `npm run examples`.
+
+## How it works
+
+1. The worker gets a request on a route and asks its middleware: here the cache, then the peers, then the network.
+2. Service workers can't use WebRTC, so DelegatePlugin asks the page that made the request. Its PeerPlugin asks the
+   connected visitors whether they have the URL, and gets it from the first that does.
+3. The worker answers with what came back and keeps it in its cache, from where this visitor shares it in turn.
+
+## Only route public assets
+
+A peer can send any bytes for a URL it says it has. Route assets that are the same for every visitor.
+DelegatePlugin asks the peers for images, fonts, audio, video and text tracks, and CachePlugin gives what they
+sent to those requests alone. For anything else, DelegatePlugin asks only when the request carries Subresource
+Integrity metadata, such as a script's `integrity` attribute: it drops a peer's response that doesn't match, and
+CachePlugin a cached one. The worker never answers page loads, frames, embedded
+objects, workers or worklets, which can't carry one.
+
+## Upgrading from v1
+
+v2 is a rewrite: import `ordered` and `fastest` instead of `PeerCDN.strategies`, bundle the worker instead of
+`importScripts`, and let PeerPlugin answer the worker by itself.
+[MIGRATION.md](MIGRATION.md) maps every v1 call to its v2 form and lists the behaviour changes.
+
+## Contributing
+
+Bug reports and pull requests are welcome: see [CONTRIBUTING.md](.github/CONTRIBUTING.md).
+
+## License
+
+MIT, see [LICENSE.md](LICENSE.md).

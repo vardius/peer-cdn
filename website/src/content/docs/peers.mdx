@@ -1,0 +1,94 @@
+---
+title: Peers
+description: PeerPlugin, the part of peer-cdn that runs in pages, what visitors share with each other, and what to route through them.
+---
+
+Service workers can't use WebRTC, so the connections between visitors live in the pages. Each page runs a
+`PeerPlugin`, which:
+
+- connects to the other visitors' pages over [peer-data](https://vardius.github.io/peer-data/) data channels;
+- shares the responses in its worker's cache with them;
+- finds responses among them when its worker's DelegatePlugin asks.
+
+```ts
+import { io } from 'socket.io-client';
+import { PeerPlugin, SocketChannel } from 'peer-cdn';
+
+const peers = new PeerPlugin({
+  signaling: new SocketChannel(io('https://signaling.example.com')),
+  configuration: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] },
+  onPeers: (count) => console.log(`connected to ${count} visitors`),
+});
+```
+
+## Options
+
+| Option          | What it is                                                                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------- |
+| `signaling`     | How the page reaches the others: any peer-data signaling, usually a `SocketChannel` to your server.     |
+| `cacheName`     | The cache whose responses the page shares: the worker's CachePlugin's. `peer-cdn` by default.           |
+| `room`          | The room the visitors meet in. `peer-cdn` by default.                                                   |
+| `configuration` | The `RTCConfiguration` for every connection, ICE servers included.                                      |
+| `timeout`       | How long a lookup may take, the transfer included, in milliseconds. 3000 by default.                    |
+| `maxSize`       | The largest body the page sends or accepts, in bytes. 2 MiB by default.                                 |
+| `onPeers`       | Called with the number of connected visitors whenever it changes.                                       |
+
+Pages meet the visitors in the same room of the same signaling. To keep two sites, or two versions of your
+assets, apart, give them different rooms.
+
+## How a file travels
+
+When the worker asks for a URL, or you call `peers.fetch(url)` yourself:
+
+1. The page asks every connected visitor whether it has the URL.
+2. It asks the first that says yes to send it. The body comes in 16 KiB pieces after the status and headers.
+3. When that visitor leaves or fails part-way, the page asks the next one that said yes.
+4. The page answers with the response, or with `null` when no one has it or the time runs out. The worker then
+   asks its next middleware.
+
+Each visitor sends this page one body at a time, so no data channel buffers more than one: requests for other
+files from the same visitor wait their turn. A visitor still sending a body the page no longer waits for, because
+the time ran out or the body is over `maxSize`, sends the rest before the page asks it for another. Without
+visitors, a lookup answers `null` at once.
+
+## What visitors share
+
+A page shares a response only when all of these hold:
+
+- it is in the page's cache, `cacheName`, which the worker filled;
+- its URL is on the page's own origin;
+- its status is 200, and its `Cache-Control` has neither `private` nor `no-store`;
+- its body is no larger than `maxSize`.
+
+It sends each visitor one body at a time, as a page asks for them, and four at most to all of them together: a
+visitor that asks for more is told the page has none, and asks another or your server. A visitor that takes no
+more of a body for 10 seconds is sent no more of it. The page accepts only 200 responses no larger than
+`maxSize`. The worker's CachePlugin keeps no `no-store` responses in the first place.
+
+## Only route public assets
+
+A visitor can send any bytes for a URL it says it has. Route assets that are the same for every visitor, such
+as images, fonts, scripts and stylesheets, and never pages or API responses that depend on who asks. Mark
+responses for one user `Cache-Control: private`, so pages don't share them even if you route them by mistake.
+
+DelegatePlugin asks the visitors for images, fonts, audio, video and text tracks, which the browser only shows
+or plays, and CachePlugin gives what they sent to those requests alone. Anything else, such as a script, a
+stylesheet or a `fetch()`, DelegatePlugin asks for only when the request carries Subresource Integrity metadata
+with a SHA-256, SHA-384 or SHA-512 hash, and it drops a response that doesn't match it; CachePlugin deletes a
+cached one that doesn't, and the worker asks its next middleware. Give scripts and stylesheets an `integrity` attribute, or
+they come from this browser's cache and your server alone. Page loads, frames, embedded objects, workers and
+worklets can't carry it, so the worker never answers them: they always come from your server.
+
+```html
+<script src="/assets/app.js" integrity="sha384-…" crossorigin="anonymous"></script>
+```
+
+Visitors connect directly, so each can learn the IP addresses of the visitors it connects to, as with any
+WebRTC connection. Say so in your privacy policy.
+
+## Methods
+
+- **`peers.peers`** is the number of visitors the page is connected to now.
+- **`peers.fetch(url)`** asks them for `url`, relative to the page, and resolves with the response or `null`.
+  Nothing checks what a visitor sent, so don't run it as code.
+- **`peers.close()`** leaves them and stops answering the worker. Lookups in progress resolve with `null`.

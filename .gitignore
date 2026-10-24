@@ -1,8 +1,14 @@
-typings
-.code
+node_modules/
+dist/
+coverage/
+.vitest/
 .DS_Store
 *.log
-node_modules
-coverage
-.idea
-npm-debug.log
+
+# Website
+website/node_modules/
+website/dist/
+website/.astro/
+
+# Built by test/global-setup.ts
+test/sw/worker.built.js

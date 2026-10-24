@@ -1,0 +1,76 @@
+---
+title: Signaling
+description: How visitors' pages find each other before WebRTC connects them, with peer-cdn's socket.io server, BroadcastChannel, or signaling of your own.
+---
+
+Before two pages can connect directly, they exchange a few messages through a server: who is on the site, the
+descriptions of their connections, and the addresses they can be reached at. That is signaling. After that,
+files go straight from one browser to the other, and the server sees none of them.
+
+PeerPlugin takes any [peer-data signaling](https://vardius.github.io/peer-data/signaling/) as its `signaling`
+option.
+
+## peer-cdn's server
+
+`peer-cdn/server` is a signaling server on socket.io 4. Attach it to a Node.js HTTP or HTTPS server:
+
+```ts
+import { createServer } from 'node:http';
+import { attachSignaling } from 'peer-cdn/server';
+
+const server = createServer();
+attachSignaling(server, { cors: { origin: 'https://www.example.com' } });
+server.listen(8080);
+```
+
+The second argument is socket.io's server options; allow your site's origin in `cors` when the server is on
+another origin. `attachSignaling` returns the socket.io `Server`, to add whatever your site needs, such as
+authentication or rate limits.
+
+It routes peer-data's messages by their type, room and ids, and never reads what they carry:
+
+- a page joining or leaving goes to the others in the room;
+- offers, answers and ICE candidates go to the one page they are for, and only in the room the sender joined;
+- each socket speaks only for the ids it joined with, 16 at most, and when it drops, the others in its rooms hear
+  that it left;
+- a page whose connection drops reconnects and asks for its id again, often before the server has noticed its
+  old socket is gone. It gets the id back once the server does, within socket.io's ping interval and timeout:
+  45 seconds by default.
+
+Pages reach it with `SocketChannel`, which peer-cdn takes from peer-data, over a socket.io-client 4 socket:
+
+```ts
+import { io } from 'socket.io-client';
+import { PeerPlugin, SocketChannel } from 'peer-cdn';
+
+new PeerPlugin({ signaling: new SocketChannel(io('https://signaling.example.com')) });
+```
+
+Any peer-data peers can use the same server. While you develop with Vite, [the plugin](../vite/) runs it on
+Vite's own server.
+
+## ICE servers
+
+Pages on different networks need ICE servers to find a way through routers and firewalls. Pass them in
+`configuration`:
+
+```ts
+new PeerPlugin({
+  signaling,
+  configuration: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] },
+});
+```
+
+A STUN server lets most visitors connect directly. Those behind stricter networks need a TURN server to relay
+their traffic; add it to `iceServers` with its credentials. Visitors who can't connect still get every file from
+your server.
+
+## Between tabs
+
+`BroadcastChannelSignaling` reaches the pages of one browser with no server. The
+[live demo](../demo/) uses it; a real site needs a server, since its visitors are in different browsers.
+
+## Your own
+
+Signaling is an object with a `send` and a `subscribe`, so any transport that routes the messages between pages
+works: see [Your own](https://vardius.github.io/peer-data/signaling/#your-own) in peer-data's guide.

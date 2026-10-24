@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["es2023", "dom", "dom.iterable"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "paths": {
+      "peer-cdn": ["./src/index.ts"],
+      "peer-cdn/server": ["./src/server.ts"],
+      "peer-cdn/vite": ["./src/vite.ts"]
+    }
+  },
+  "include": ["src", "test", "examples", "*.ts", "*.js"],
+  "exclude": ["test/sw/worker.built.js"]
+}

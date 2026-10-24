@@ -1,0 +1,47 @@
+---
+title: Examples
+description: The runnable example site in the repository, its service worker, page and Vite config, and the two-visitor demo.
+---
+
+import { Code } from '@astrojs/starlight/components';
+import worker from '../../../../examples/sw.ts?raw';
+import page from '../../../../examples/main.ts?raw';
+import config from '../../../../examples/vite.config.ts?raw';
+
+The [examples folder](https://github.com/vardius/peer-cdn/tree/master/examples) holds a small site with six
+pictures. Serve it from a clone of the repository:
+
+```sh
+npm ci
+npm run examples
+```
+
+Open http://localhost:5173 in one browser, then in a second browser, or a private window, while the first stays
+open. The second gets the pictures from the first over WebRTC, and the count of pictures the server sent stays
+the same. Tabs of one browser share its cache, so they never need a peer.
+
+## The worker
+
+Pictures come from the cache, then from the other visitors, then from the server:
+
+<Code code={worker} lang="ts" title="examples/sw.ts" />
+
+## The page
+
+The page registers the worker, runs PeerPlugin, and shows the pictures once it has found a peer, or after three
+seconds:
+
+<Code code={page} lang="ts" title="examples/main.ts" />
+
+## The config
+
+[The Vite plugin](../vite/) serves the worker and runs the signaling server on the same port, and a second
+plugin counts the pictures the server sends. It imports the plugin from the repository's source; your config
+imports it from `peer-cdn/vite`:
+
+<Code code={config} lang="ts" title="examples/vite.config.ts" />
+
+## Two visitors in one page
+
+`examples/visitors/visitor.ts` is a visitor without a service worker, which the [live demo](../demo/) runs twice
+in one page. Its tests run it in Chromium, Firefox and WebKit.

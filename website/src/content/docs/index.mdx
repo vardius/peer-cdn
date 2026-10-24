@@ -1,0 +1,128 @@
+---
+title: A peer-to-peer CDN for your site
+description: peer-cdn's service worker serves your site's assets from other visitors' browsers over WebRTC, then from your server, caching what comes back.
+template: splash
+hero:
+  title: Your visitors are your <span class="accent">CDN</span>
+  tagline: A service worker answers requests for your assets from this browser's cache, then from the other visitors on your site over WebRTC, and only then from your server. Every visitor who has a file can send it to the next.
+  actions:
+    - text: Get started
+      link: getting-started/
+      icon: right-arrow
+    - text: Try the live demo
+      link: demo/
+      variant: minimal
+---
+
+import { CardGrid, Card, LinkButton, LinkCard } from '@astrojs/starlight/components';
+import VisitorsDemo from '../../components/VisitorsDemo.astro';
+import Stats from '../../components/Stats.astro';
+
+<Stats />
+
+<div class="landing-section">
+
+<p class="eyebrow">Features</p>
+
+## What you get
+
+<CardGrid>
+	<Card title="Routes in your worker" icon="setting">
+		Send requests for a path through middleware, asked in order or all at once: the cache, the other
+		visitors, the network, or your own.
+	</Card>
+	<Card title="Visitors share their cache" icon="random">
+		Each open page shares what its worker cached, and finds files among the other visitors for its worker,
+		over [peer-data](https://vardius.github.io/peer-data/) data channels.
+	</Card>
+	<Card title="Careful with what it shares" icon="approve-check">
+		Only same-origin 200 responses not marked `private` or `no-store`. Scripts and stylesheets come from a peer
+		only when they match the request's Subresource Integrity metadata.
+	</Card>
+	<Card title="The network as a fallback" icon="rocket">
+		What no cache or visitor has comes from your server. Requests you don't route are left to the browser.
+	</Card>
+	<Card title="Vite plugin" icon="puzzle">
+		`peer-cdn/vite` bundles your worker into one script for every browser, and runs the signaling server on
+		Vite's own server while you develop.
+	</Card>
+	<Card title="Small and typed" icon="star">
+		ES modules in strict TypeScript. The worker side has no dependencies; WebRTC stays in the pages.
+	</Card>
+</CardGrid>
+
+</div>
+
+<div class="landing-section">
+
+<p class="eyebrow">Try it</p>
+
+## Two visitors, on this page
+
+<div class="landing-lead">
+	Each visitor below has a cache of its own, as a visitor in another browser has. Load the pictures as
+	Visitor&nbsp;1 and they come from the server. Load them as Visitor&nbsp;2 and they come from Visitor&nbsp;1,
+	over WebRTC. The visitors found each other through `BroadcastChannel`, with no signaling server.
+</div>
+
+<VisitorsDemo />
+
+<LinkCard title="More about the demo" href="demo/" description="What each step shows, and the code the visitors run." />
+
+</div>
+
+<div class="landing-section">
+
+<p class="eyebrow">Upgrading</p>
+
+## Coming from v1
+
+<div class="landing-lead">
+	The router, the strategies and the plugins keep their shape. Import them instead of loading a global, bundle
+	the worker, and let PeerPlugin answer the worker by itself.
+</div>
+
+<div class="compare">
+
+```js title="v1"
+self.importScripts('/peer-cdn/index.js');
+const { CachePlugin, NetworkPlugin } = PeerCDN;
+const { ordered } = PeerCDN.strategies;
+
+const cachePlugin = new CachePlugin({ version: 1 });
+const networkPlugin = new NetworkPlugin();
+
+const cdn = new PeerCDN();
+cdn.GET('/css/main.css', ordered,
+  cachePlugin.getMiddleware,
+  networkPlugin.getMiddleware);
+cdn.register();
+```
+
+```ts title="v2"
+import { CachePlugin, NetworkPlugin, PeerCDN, ordered } from 'peer-cdn';
+
+const cache = new CachePlugin();
+const network = new NetworkPlugin();
+
+new PeerCDN()
+  .GET('/css', ordered,
+    cache.getMiddleware,
+    network.getMiddleware)
+  .register();
+```
+
+</div>
+
+<LinkCard title="Migration guide" href="migrating-from-v1/" description="Every v1 call and its v2 form, and the behaviour changes to know about." />
+
+</div>
+
+<div class="cta not-content">
+	<h2>Share your assets between visitors</h2>
+	<p>Add a worker, a line to each page and a signaling server. With Vite, the plugin sets up the worker and the server for you.</p>
+	<div class="cta-actions">
+		<LinkButton href="getting-started/" icon="right-arrow">Get started</LinkButton>
+		<LinkButton href="routing/" variant="minimal">Read the docs</LinkButton>
+	</div>
+</div>

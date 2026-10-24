@@ -1,0 +1,82 @@
+---
+title: Vite
+description: peer-cdn's Vite plugin serves and builds your service worker as one script, and runs the signaling server on Vite's dev and preview servers.
+---
+
+import { Code } from '@astrojs/starlight/components';
+import config from '../../../../examples/vite.config.ts?raw';
+
+Browsers run a service worker from a single script at a fixed address. Vite serves your modules one by one
+while you develop and gives built files hashed names, so it needs help with a worker. `peer-cdn/vite` gives it:
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import { peerCDN } from 'peer-cdn/vite';
+
+export default defineConfig({
+  plugins: [peerCDN({ worker: 'src/sw.ts' })],
+});
+```
+
+```ts
+// in each page
+await navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
+```
+
+With a relative base, such as `./`, `BASE_URL` is `./` in a build, which a page reads from its own folder: a
+page in a folder below the base registers `../sw.js`, one `../` for each folder. It needs Vite 8.
+
+## What it does
+
+- **Bundles the worker** from `worker`, relative to Vite's root, into one classic script, which every browser can
+  run as a service worker. Only what the worker imports goes in: PeerPlugin and peer-data stay in your pages.
+- **Serves it** at `sw.js` below your site's base while `vite` runs, bundled afresh on each request, so a reload
+  picks up your changes.
+- **Writes it** to `sw.js` at the top of the build when `vite build` runs, and `vite preview` serves it from
+  there. A server build, as frameworks make for rendering pages, gets no worker.
+- **Runs the signaling server** of `peer-cdn/server` on Vite's own server, in `vite` and `vite preview`. Pages
+  reach it with `io()`, on the origin they came from. It needs socket.io installed: `npm install -D socket.io`.
+  In middleware mode, where Vite has no server of its own, attach the signaling server to yours.
+
+The worker is bundled with your config's `resolve.alias`, `define`, mode and base, but without your config's
+other plugins. For routes below your base, take the base from the worker's own address, which is right whether
+the base is absolute or relative, as `./` is:
+
+```ts
+// sw.ts
+const base = new URL('./', location.href).pathname;
+
+new PeerCDN().GET(`${base}assets`, ordered, cache.getMiddleware, peers.getMiddleware, network.getMiddleware).register();
+```
+
+## Options
+
+| Option      | What it is                                                                                         |
+| ----------- | -------------------------------------------------------------------------------------------------- |
+| `worker`    | The worker's entry, relative to Vite's root, such as `src/sw.ts`. Required.                        |
+| `signaling` | Run the signaling server on Vite's dev and preview servers. `true` by default.                     |
+
+Turn `signaling` off when your pages signal some other way, such as through a server of your own; socket.io is
+then not needed. The signaling server answers every request below `/socket.io/`, so turn it off too when your
+dev server proxies a socket.io server of your own there. Other WebSockets on Vite's server, such as its own and
+those `server.proxy` opens, are left alone.
+
+## In production
+
+`vite build` writes the worker with the rest of your site, so serve it as you serve the site. Vite's servers
+only run while you develop, so run the signaling server on a Node.js server of your own, and give the pages its
+address:
+
+```ts
+new PeerPlugin({ signaling: new SocketChannel(io('https://signaling.example.com')) });
+```
+
+See [Signaling](../signaling/) for the server.
+
+## The example's config
+
+The example site runs on this config, with a second plugin that counts the pictures its server sends. It
+imports the plugin from the repository's source, where your config imports it from `peer-cdn/vite`:
+
+<Code code={config} lang="ts" title="examples/vite.config.ts" />

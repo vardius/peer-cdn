@@ -1,0 +1,59 @@
+---
+// Headline facts under the hero.
+const stats = [
+	{ value: '2.4 KB', label: 'worker with the cache, the peers and the network, gzipped' },
+	{ value: '0', label: 'WebRTC code in the worker: the pages hold the connections' },
+	{ value: '1', label: 'Vite plugin to serve and build the worker' },
+	{ value: '3', label: 'browser engines its tests connect real visitors in' },
+];
+---
+
+<ul class="stats not-content">
+	{
+		stats.map((s) => (
+			<li>
+				<span class="value">{s.value}</span>
+				<span class="label">{s.label}</span>
+			</li>
+		))
+	}
+</ul>
+
+<style>
+	.stats {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+		gap: 1px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		border: 1px solid var(--sl-color-hairline-light);
+		border-radius: 0.75rem;
+		overflow: hidden;
+		background: var(--sl-color-hairline-light);
+	}
+
+	li {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		margin: 0;
+		padding: 1.25rem 1.5rem;
+		background: var(--sl-color-bg);
+	}
+
+	.value {
+		font-size: var(--sl-text-3xl);
+		font-weight: 700;
+		line-height: 1.1;
+		letter-spacing: -0.02em;
+		color: var(--sl-color-white);
+		font-variant-numeric: tabular-nums;
+	}
+
+	.label {
+		font-size: var(--sl-text-sm);
+		line-height: 1.4;
+		color: var(--sl-color-gray-3);
+	}
+</style>

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-labelledby="t">
+<title id="t">Mountain peaks</title>
+<rect width="480" height="320" fill="#cfe3f2"/>
+<path d="M-40 320 L21 216 L82 320Z" fill="hsl(215 25% 70%)"/>
+<path d="M33 320 L101 222 L168 320Z" fill="hsl(215 25% 70%)"/>
+<path d="M114 320 L165 257 L215 320Z" fill="hsl(215 25% 70%)"/>
+<path d="M175 320 L236 234 L297 320Z" fill="hsl(215 25% 70%)"/>
+<path d="M248 320 L301 204 L354 320Z" fill="hsl(215 25% 70%)"/>
+<path d="M312 320 L348 214 L383 320Z" fill="hsl(215 25% 70%)"/>
+<path d="M355 320 L387 218 L419 320Z" fill="hsl(215 25% 70%)"/>
+<path d="M393 320 L459 244 L526 320Z" fill="hsl(215 25% 70%)"/>
+<path d="M473 320 L527 202 L582 320Z" fill="hsl(215 25% 70%)"/>
+<path d="M-40 310 L19 187 L77 310Z" fill="hsl(211 33% 59%)"/>
+<path d="M30 310 L72 216 L113 310Z" fill="hsl(211 33% 59%)"/>
+<path d="M80 310 L126 195 L172 310Z" fill="hsl(211 33% 59%)"/>
+<path d="M135 310 L174 201 L213 310Z" fill="hsl(211 33% 59%)"/>
+<path d="M182 310 L218 178 L254 310Z" fill="hsl(211 33% 59%)"/>
+<path d="M225 310 L286 206 L346 310Z" fill="hsl(211 33% 59%)"/>
+<path d="M298 310 L339 189 L379 310Z" fill="hsl(211 33% 59%)"/>
+<path d="M347 310 L397 164 L447 310Z" fill="hsl(211 33% 59%)"/>
+<path d="M407 310 L453 202 L498 310Z" fill="hsl(211 33% 59%)"/>
+<path d="M462 310 L532 211 L601 310Z" fill="hsl(211 33% 59%)"/>
+<path d="M-40 300 L15 160 L71 300Z" fill="hsl(207 41% 48%)"/>
+<path d="M26 300 L93 147 L160 300Z" fill="hsl(207 41% 48%)"/>
+<path d="M106 300 L171 170 L235 300Z" fill="hsl(207 41% 48%)"/>
+<path d="M184 300 L244 144 L304 300Z" fill="hsl(207 41% 48%)"/>
+<path d="M256 300 L306 134 L357 300Z" fill="hsl(207 41% 48%)"/>
+<path d="M316 300 L384 173 L451 300Z" fill="hsl(207 41% 48%)"/>
+<path d="M397 300 L440 158 L483 300Z" fill="hsl(207 41% 48%)"/>
+<path d="M449 300 L488 176 L527 300Z" fill="hsl(207 41% 48%)"/>
+<path d="M-40 290 L3 128 L45 290Z" fill="hsl(203 49% 37%)"/>
+<path d="M11 290 L73 113 L134 290Z" fill="hsl(203 49% 37%)"/>
+<path d="M85 290 L120 121 L155 290Z" fill="hsl(203 49% 37%)"/>
+<path d="M127 290 L178 118 L229 290Z" fill="hsl(203 49% 37%)"/>
+<path d="M188 290 L226 136 L264 290Z" fill="hsl(203 49% 37%)"/>
+<path d="M234 290 L264 80 L295 290Z" fill="hsl(203 49% 37%)"/>
+<path d="M270 290 L334 135 L398 290Z" fill="hsl(203 49% 37%)"/>
+<path d="M347 290 L409 81 L471 290Z" fill="hsl(203 49% 37%)"/>
+<path d="M421 290 L477 133 L532 290Z" fill="hsl(203 49% 37%)"/>
+<path d="M-40 280 L12 74 L64 280Z" fill="hsl(199 57% 26%)"/>
+<path d="M22 280 L61 67 L99 280Z" fill="hsl(199 57% 26%)"/>
+<path d="M69 280 L99 45 L129 280Z" fill="hsl(199 57% 26%)"/>
+<path d="M105 280 L164 62 L223 280Z" fill="hsl(199 57% 26%)"/>
+<path d="M176 280 L248 61 L320 280Z" fill="hsl(199 57% 26%)"/>
+<path d="M262 280 L304 85 L345 280Z" fill="hsl(199 57% 26%)"/>
+<path d="M312 280 L348 98 L384 280Z" fill="hsl(199 57% 26%)"/>
+<path d="M355 280 L420 50 L485 280Z" fill="hsl(199 57% 26%)"/>
+<path d="M433 280 L477 89 L520 280Z" fill="hsl(199 57% 26%)"/>
+</svg>

@@ -1,0 +1,89 @@
+---
+title: Plugins
+description: The middleware peer-cdn's worker asks for responses, CachePlugin, DelegatePlugin and NetworkPlugin, and how to write your own.
+---
+
+A plugin makes middleware: its `getMiddleware` takes the fetch event and returns the middleware for that request.
+Pass `getMiddleware` itself to a route, in the order the strategy should ask:
+
+```ts
+new PeerCDN().GET('/assets', ordered, cache.getMiddleware, peers.getMiddleware, network.getMiddleware).register();
+```
+
+## CachePlugin
+
+```ts
+const cache = new CachePlugin({ cacheName: 'peer-cdn' });
+```
+
+Answers from a cache, and keeps what the other middleware find. It answers only from its own cache, the one
+named `cacheName`, which is `peer-cdn` by default. [PeerPlugin](../peers/) shares that cache with the other
+visitors, so give both the same name.
+
+It keeps only whole 200 responses, and none marked `Cache-Control: no-store`. When a request has Subresource
+Integrity metadata and the cached body doesn't match it, as a visitor's might when it was kept for a request
+without any, or an older file at the same URL, the cached response is deleted and the request passed on. A
+visitor's response that DelegatePlugin couldn't check, marked with a `Peer-CDN-Unchecked` header, answers only
+requests for images, fonts and media: a script or a `fetch()` of the same URL goes to the next middleware. A Range
+request gets its part of the cached response:
+
+- a range within the body gets that part, as a 206 response;
+- a range that runs past the end is cut at the end, and a suffix longer than the body gets all of it;
+- a range that starts past the end gets 416;
+- a header with several ranges, or another unit, is ignored, and the whole response is sent.
+
+The cache keeps what it stores until you delete it, which you can do in an `activate` listener of your own.
+Visitors on every release meet in one room and share one cache name, so give a file a new URL whenever it
+changes, as the hashed names of Vite's built files do: each URL then has one right body, whichever release the
+visitor sending it runs. Subresource Integrity also turns away an old script or stylesheet at the same URL.
+
+## DelegatePlugin
+
+```ts
+const peers = new DelegatePlugin({ timeout: 5000 });
+```
+
+Asks the other visitors, through a page: service workers can't use WebRTC. It sends the URL to the page that
+made the request, whose PeerPlugin looks for it among the visitors and sends back what it found. A request
+whose page has closed goes to another open page of the site.
+
+- A page has half a second to acknowledge the request. One that doesn't, because it doesn't run PeerPlugin, is
+  passed over, so run PeerPlugin on every page the worker controls.
+- After that, `timeout` is how long to wait for the page's answer, in milliseconds: 5000 by default. PeerPlugin's
+  own `timeout` decides how long the page looks.
+- It asks for images, fonts, audio, video and text tracks, and marks what comes back with a `Peer-CDN-Unchecked`
+  header, which CachePlugin heeds. Anything else, such as a script or a stylesheet, it asks for only when the
+  request has Subresource Integrity metadata with a SHA-256, SHA-384 or SHA-512 hash, such as from an `integrity`
+  attribute, and it drops a response that doesn't match it.
+
+## NetworkPlugin
+
+```ts
+const network = new NetworkPlugin();
+```
+
+Fetches the request from your server. Put it last, so the other middleware are asked first and get a copy of
+what it fetches. When the browser is offline, it answers `null`.
+
+A route needs no NetworkPlugin to reach the server: when no middleware answers, the worker fetches the request
+itself. With NetworkPlugin, the response passes through the strategy, which gives the cache its copy.
+
+## Your own middleware
+
+Middleware is an object with a `get`, which returns a response or `null` to pass, and an optional `put`, which
+receives a copy of a response another middleware returned. Either may be async. A plugin is anything with a
+`getMiddleware` that makes one for a fetch event:
+
+```ts
+import type { MiddlewareFactory } from 'peer-cdn';
+
+// Answers requests for missing pictures with a placeholder.
+const placeholder: MiddlewareFactory = () => ({
+  get: () => new Response('<svg xmlns="http://www.w3.org/2000/svg"/>', { headers: { 'Content-Type': 'image/svg+xml' } }),
+});
+
+new PeerCDN().GET('/images', ordered, cache.getMiddleware, network.getMiddleware, placeholder).register();
+```
+
+A middleware that throws counts as having nothing, and the error is reported as uncaught in the worker. The
+response `get` returns is the one the page receives, so return a new one rather than one you keep using.
