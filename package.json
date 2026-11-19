@@ -1,6 +1,6 @@
 {
   "name": "peer-cdn",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A peer-to-peer CDN for your site: a service worker serves assets from other visitors' caches over WebRTC before asking your server",
   "type": "module",
   "main": "./dist/index.js",
